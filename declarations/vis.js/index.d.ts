@@ -1,6 +1,6 @@
 declare module 'viz.js' {
     import viz = require('viz.js');
-    export = function (src: string, opts?: VizOpts): string;
+    export default function (src: string, opts?: VizOpts): string;
 }
 
 interface VizOpts {

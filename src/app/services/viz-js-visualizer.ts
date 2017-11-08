@@ -1,4 +1,4 @@
-import Viz = require('viz.js');
+import Viz from 'viz.js';
 
 import {SvgString} from '../models/svg-string';
 import {DotSource} from '../models/dot-source';

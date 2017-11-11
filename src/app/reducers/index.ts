@@ -58,7 +58,7 @@ export const selectGrammar =
         start,
     });
 
-export const makeDotSelector =
+export const createDotSelector =
     <NonTerminal extends string, Terminal extends string>
     (converter: (grammar: Grammar<NonTerminal, Terminal>) => DotSource) =>
         createSelector(selectGrammar, converter);

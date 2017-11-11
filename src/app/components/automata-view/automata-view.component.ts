@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {SafeHtml} from '@angular/platform-browser';
 
 import {Visualizer} from '../../services/visualizer.service';
@@ -8,16 +8,15 @@ import {DotSource} from '../../models/dot-source';
     selector: 'av-automata-view',
     templateUrl: './automata-view.component.html',
     styleUrls: ['./automata-view.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AutomataViewComponent implements OnChanges {
-    visualization: SafeHtml;
-
+export class AutomataViewComponent {
     @Input() dot: DotSource;
 
-    ngOnChanges() {
-        this.visualization = this.visualizer.visualize(this.dot);
+    constructor(private readonly visualizer: Visualizer) {
     }
 
-    constructor(private readonly visualizer: Visualizer) {
+    get visualization(): SafeHtml {
+        return this.visualizer.visualize(this.dot);
     }
 }

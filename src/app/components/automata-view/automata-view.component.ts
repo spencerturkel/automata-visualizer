@@ -1,9 +1,9 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {SafeHtml} from '@angular/platform-browser';
 
-import {environment} from '../../../environments/environment';
-import {Visualizer} from '../../services/visualizer.service';
 import {DotSource} from '../../models/dot-source';
+import {Environment} from '../../services/environment.service';
+import {Visualizer} from '../../services/visualizer.service';
 
 @Component({
     selector: 'av-automata-view',
@@ -12,10 +12,14 @@ import {DotSource} from '../../models/dot-source';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AutomataViewComponent {
-    @Input() dot: DotSource;
-    showSource = !environment.production;
+    @Input() readonly dot: DotSource;
+    readonly showSource: boolean;
 
-    constructor(private readonly visualizer: Visualizer) {
+    constructor(
+        {production}: Environment,
+        private readonly visualizer: Visualizer,
+        ) {
+        this.showSource = !production;
     }
 
     get visualization(): SafeHtml {

@@ -9,6 +9,7 @@ import {GrammarFormViewComponent} from './components/grammar-form-view/grammar-f
 import {reducer} from './reducers/index';
 import {ConstantDotConverter} from './services/constant-dot-converter.service';
 import {DotConverter} from './services/dot-converter.service';
+import {Environment} from './services/environment.service';
 import {Visualizer} from './services/visualizer.service';
 import {VizJsVisualizer} from './services/viz-js-visualizer';
 
@@ -24,6 +25,7 @@ import {VizJsVisualizer} from './services/viz-js-visualizer';
         StoreModule.forRoot(reducer),
     ],
     providers: [
+        Environment,
         {provide: DotConverter, useClass: ConstantDotConverter},
         {provide: Visualizer, useClass: VizJsVisualizer},
     ],

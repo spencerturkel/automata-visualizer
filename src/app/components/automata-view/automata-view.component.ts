@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {SafeHtml} from '@angular/platform-browser';
 
+import {environment} from '../../../environments/environment';
 import {Visualizer} from '../../services/visualizer.service';
 import {DotSource} from '../../models/dot-source';
 
@@ -12,6 +13,7 @@ import {DotSource} from '../../models/dot-source';
 })
 export class AutomataViewComponent {
     @Input() dot: DotSource;
+    showSource = !environment.production;
 
     constructor(private readonly visualizer: Visualizer) {
     }

@@ -1,12 +1,14 @@
 import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {BrowserModule} from '@angular/platform-browser';
+import {StoreModule} from '@ngrx/store';
 
+import {AppComponent} from './app.component';
 import {AutomataViewComponent} from './components/automata-view/automata-view.component';
 import {GrammarFormViewComponent} from './components/grammar-form-view/grammar-form-view.component';
+import {reducer} from './reducers/index';
 import {Visualizer} from './services/visualizer.service';
 import {VizJsVisualizer} from './services/viz-js-visualizer';
-import {AppComponent} from './app.component';
 
 @NgModule({
     declarations: [
@@ -17,6 +19,7 @@ import {AppComponent} from './app.component';
     imports: [
         BrowserModule,
         ReactiveFormsModule,
+        StoreModule.forRoot(reducer),
     ],
     providers: [
         {provide: Visualizer, useClass: VizJsVisualizer},

@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {FormGroup} from '@angular/forms';
 
 @Component({
@@ -6,6 +6,8 @@ import {FormGroup} from '@angular/forms';
     templateUrl: './grammar-form-view.component.html',
 })
 export class GrammarFormViewComponent implements OnInit {
+    @Output() submit = new EventEmitter();
+
     form: FormGroup;
 
     constructor() {
@@ -13,5 +15,8 @@ export class GrammarFormViewComponent implements OnInit {
 
     ngOnInit() {
         this.form = new FormGroup({});
+    }
+
+    onSubmit() {
     }
 }

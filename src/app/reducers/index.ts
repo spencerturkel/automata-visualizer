@@ -1,5 +1,8 @@
 import {createEntityAdapter, EntityState} from '@ngrx/entity';
-import {Actions, NEW_GRAMMAR} from '../actions/index';
+import {createSelector} from '@ngrx/store';
+
+import {Actions, NEW_GRAMMAR} from '../actions';
+import {DotSource} from '../models/dot-source';
 import {Grammar} from '../models/grammar';
 import {GrammarRule} from '../models/grammar-rule';
 
@@ -20,15 +23,15 @@ const adapter = createEntityAdapter<GrammarRule<any, any>>({
     selectId: rule => rule.nonTerminal,
 });
 
-export const initialState = adapter.getInitialState<Grammar<'S', never>>({
-    nonTerminals: ['S'],
-    start: 'S',
-    rules: {
+export const initialState = adapter.getInitialState<State<'S', never>>({
+    entities: {
         'S': {
             nonTerminal: 'S',
             production: '',
         },
     },
+    ids: ['S'],
+    start: 'S',
 });
 
 export function reducer<NonTerminal extends string,
@@ -54,3 +57,8 @@ export const selectGrammar =
         rules: ids as any,
         start,
     });
+
+export const makeDotSelector =
+    <NonTerminal extends string, Terminal extends string>
+    (converter: (grammar: Grammar<NonTerminal, Terminal>) => DotSource) =>
+        createSelector(selectGrammar, converter);

@@ -1,9 +1,9 @@
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output} from '@angular/core';
-import {FormArray, FormControl, FormGroup} from '@angular/forms';
+import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
 import {filter, map} from 'rxjs/operators';
 
 import {Grammar} from '../../models/grammar';
-import {KleeneStar} from '../../models/kleene-star';
+import {fromKleeneStar, toKleeneStar} from '../../models/kleene-star';
 
 /*
 const exampleFormValue = new FormArray([
@@ -28,27 +28,29 @@ const exampleFormValue = new FormArray([
 
 type FormValue = { nonTerminal: string, production: string }[];
 
-const formProductionToGrammarProduction = <T extends string>(production: string): KleeneStar<T> => {
-    if (production === '') {
-        return '';
-    }
-
-    return {
-        val: production[0] as T,
-        rest: formProductionToGrammarProduction(production.slice(1)),
+const grammarToForm =
+    <NonTerminal extends string, Terminal extends string>
+    (grammar: Grammar<NonTerminal, Terminal>): FormArray => {
+        const controls = grammar.nonTerminals
+            .map(nonTerminal => grammar.rules[nonTerminal]
+                .map(rule => new FormGroup({
+                    nonTerminal: new FormControl(nonTerminal, Validators.required),
+                    production: new FormControl(fromKleeneStar(rule.production)),
+                })))
+            .reduce((all, next) => all.concat(next), []);
+        return new FormArray(controls);
     };
-};
 
 const formToGrammar =
     (formValue: FormValue): Grammar<any, any> => {
         return {
             start: formValue[0].nonTerminal,
             nonTerminals: formValue.map(x => x.nonTerminal),
-            rules: formValue.reduce((prev, next) => ({
+            rules: formValue.reduce((prev, next) => next.nonTerminal ? ({
                 ...prev,
                 nonTerminal: next.nonTerminal,
-                production: formProductionToGrammarProduction(next.production),
-            }), {}) // TODO
+                production: toKleeneStar(next.production),
+            }) : prev, {}),
         };
     };
 
@@ -59,15 +61,13 @@ const formToGrammar =
 export class GrammarFormViewComponent<NonTerminal extends string, Terminal extends string>
     implements OnChanges, OnInit {
     @Input() grammar: Grammar<NonTerminal, Terminal>;
+    @Output() removeRule = new EventEmitter<number>();
     @Output() submit = new EventEmitter<Grammar<NonTerminal, Terminal>>();
 
-    readonly form: FormArray = new FormArray([]);
-
-    constructor() {
-    }
+    form: FormArray;
 
     ngOnChanges() {
-        // TODO set form value
+        this.form = grammarToForm(this.grammar);
     }
 
     ngOnInit() {
@@ -79,7 +79,7 @@ export class GrammarFormViewComponent<NonTerminal extends string, Terminal exten
             .subscribe(grammar => this.submit.emit(grammar));
     }
 
-    removeRule(ruleIndex: number): void {
-        // TODO
+    onRemoveRule(ruleIndex: number): void {
+        this.removeRule.emit(ruleIndex);
     }
 }

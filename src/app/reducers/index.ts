@@ -1,5 +1,5 @@
 import {createEntityAdapter, EntityState} from '@ngrx/entity';
-import {createSelector} from '@ngrx/store';
+import {createSelector, Store} from '@ngrx/store';
 
 import {Actions, NEW_GRAMMAR} from '../actions';
 import {DotSource} from '../models/dot-source';
@@ -62,3 +62,8 @@ export const createDotSelector =
     <NonTerminal extends string, Terminal extends string>
     (converter: (grammar: Grammar<NonTerminal, Terminal>) => DotSource) =>
         createSelector(selectGrammar, converter);
+
+export type AppState = State<any, any>;
+
+export abstract class AppStore extends Store<AppState> {
+}

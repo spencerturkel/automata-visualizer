@@ -1,9 +1,8 @@
 import {Component} from '@angular/core';
-import {Store} from '@ngrx/store';
 import {Observable} from 'rxjs/Observable';
 
 import {DotSource} from './models/dot-source';
-import {createDotSelector, State} from './reducers';
+import {createDotSelector, AppStore} from './reducers';
 import {DotConverter} from './services/dot-converter.service';
 
 @Component({
@@ -15,7 +14,7 @@ export class AppComponent {
 
     constructor(
         private readonly converter: DotConverter,
-        private readonly store: Store<State<any, any>>,
+        private readonly store: AppStore,
     ) {
         const selectDot = createDotSelector(grammar => converter.convert(grammar));
         this.dot$ = this.store.select(selectDot);

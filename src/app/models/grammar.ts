@@ -5,3 +5,4 @@ export interface Grammar<NonTerminal extends string, Terminal extends string> {
     rules: Record<NonTerminal, GrammarRule<NonTerminal, Terminal>[]>;
     start: NonTerminal;
 }
+

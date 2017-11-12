@@ -1,12 +1,55 @@
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output} from '@angular/core';
-import {FormArray} from '@angular/forms';
+import {FormArray, FormControl, FormGroup} from '@angular/forms';
 import {filter, map} from 'rxjs/operators';
 
 import {Grammar} from '../../models/grammar';
+import {KleeneStar} from '../../models/kleene-star';
+
+/*
+const exampleFormValue = new FormArray([
+    new FormGroup({
+        nonTerminal: new FormControl('S'),
+        production: new FormControl('A'),
+    }),
+    new FormGroup({
+        nonTerminal: new FormControl('A'),
+        production: new FormControl('aAb'),
+    }),
+    new FormGroup({
+        nonTerminal: new FormControl('A'),
+        production: new FormControl(''),
+    }),
+    new FormGroup({
+        nonTerminal: new FormControl(''),
+        production: new FormControl(''),
+    }),
+]);
+*/
+
+type FormValue = { nonTerminal: string, production: string }[];
+
+const formProductionToGrammarProduction = <T extends string>(production: string): KleeneStar<T> => {
+    if (production === '') {
+        return '';
+    }
+
+    return {
+        val: production[0] as T,
+        rest: formProductionToGrammarProduction(production.slice(1)),
+    };
+};
 
 const formToGrammar =
-    <NonTerminal extends string, Terminal extends string>(formValue: any): Grammar<NonTerminal, Terminal> => {
-        return formValue; // TODO
+    (formValue: FormValue): Grammar<any, any> => {
+        return {
+            start: formValue[0].nonTerminal,
+            nonTerminals: formValue.map(x => x.nonTerminal),
+            rules: formValue.reduce((prev, next) => ({
+                ...prev,
+                nonTerminal: next.nonTerminal,
+                production: formProductionToGrammarProduction(next.production),
+            }), {}) // TODO
+        };
     };
 
 @Component({
@@ -31,7 +74,7 @@ export class GrammarFormViewComponent<NonTerminal extends string, Terminal exten
         this.form.valueChanges
             .pipe(
                 filter(() => this.form.valid),
-                map(value => formToGrammar<NonTerminal, Terminal>(value)),
+                map(value => formToGrammar(value)),
             )
             .subscribe(grammar => this.submit.emit(grammar));
     }

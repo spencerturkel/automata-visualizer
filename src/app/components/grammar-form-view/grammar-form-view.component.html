@@ -1,6 +1,35 @@
 <p>
-  grammar-form-view works!
+    grammar-form-view works!
 </p>
 <form [formGroup]="form">
-
+    <table>
+        <thead>
+        <tr>
+            <th></th>
+            <th>Non-Terminal</th>
+            <th>Production</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr
+            *ngFor="let control of form.controls; first as isFirst; last as isLast; index as ruleIndex"
+            [formGroup]="control">
+            <td>
+                <span *ngIf="isFirst">
+                    Start
+                </span>
+            </td>
+            <td>
+                <input formControlName="nonTerminal" required>
+            </td>
+            <td>
+                <input formControlName="production">
+            </td>
+            <td>
+                <button type="button" *ngIf="!(isFirst || isLast)" (click)="removeRule(ruleIndex)"></button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 </form>

@@ -1,3 +1,3 @@
 <h1>Automata Visualizer</h1>
-<av-grammar-form-view></av-grammar-form-view>
+<av-grammar-form-view [grammar]="grammar$ | async" (submit)="onSubmit($event)"></av-grammar-form-view>
 <av-automata-view [dot]="dot$ | async"></av-automata-view>

@@ -27,7 +27,7 @@
                 <input formControlName="production">
             </td>
             <td>
-                <button type="button" *ngIf="!(isFirst || isLast)" (click)="removeRule(ruleIndex)"></button>
+                <button type="button" *ngIf="!(isFirst || isLast)" (click)="onRemoveRule(ruleIndex)"></button>
             </td>
         </tr>
         </tbody>

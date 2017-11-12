@@ -80,6 +80,6 @@ export class GrammarFormViewComponent<NonTerminal extends string, Terminal exten
     }
 
     onRemoveRule(ruleIndex: number): void {
-        this.removeRule.emit(ruleIndex);
+        this.form.removeAt(ruleIndex);
     }
 }

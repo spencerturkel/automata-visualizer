@@ -96,12 +96,20 @@ describe('GrammarFormViewComponent', () => {
             expect(formArray.control).toBe(component.form);
         });
 
-        it('should have inputs for each side of each rule of the grammar', () => {
+        it('should have inputs for the grammar and the new rule', () => {
             const inputs = fixture.debugElement.queryAll(By.css('input'));
 
             const rules = Object.values(hostComponent.grammar.rules);
 
-            expect(inputs.length).toBe(rules.length);
+            expect(inputs.length).toBe((rules.length + 1) * 2);
+        });
+
+        it('should have a button to remove any rule except the start rule and the new rule', () => {
+            const buttons = fixture.debugElement.queryAll(By.css('button'));
+
+            const rules = Object.values(hostComponent.grammar.rules);
+
+            expect(buttons.length).toBe(rules.length - 1);
         });
     });
 });

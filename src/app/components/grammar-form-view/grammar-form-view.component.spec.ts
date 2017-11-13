@@ -122,14 +122,14 @@ describe('GrammarFormViewComponent', () => {
             });
 
             describe('last', () => {
-                it('should call addBlankRule() once when focused', () => {
+                it('should call onFocusLast() once when focused', () => {
                     const last = inputs[inputs.length - 1];
 
-                    spyOn(component, 'addBlankRule');
+                    spyOn(component, 'onFocusLast');
 
                     last.triggerEventHandler('focus', null);
 
-                    expect(component.addBlankRule).toHaveBeenCalledTimes(1);
+                    expect(component.onFocusLast).toHaveBeenCalledTimes(1);
                 });
             });
         });

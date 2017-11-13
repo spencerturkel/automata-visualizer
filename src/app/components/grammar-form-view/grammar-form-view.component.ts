@@ -79,11 +79,24 @@ export class GrammarFormViewComponent<NonTerminal extends string, Terminal exten
         const formArray = grammarToForm(this.grammar);
 
         if (this.form) {
-            for (let i = 0; i < formArray.value.length; ++i) {
+            let i;
+            for (i = 0; i < formArray.value.length; ++i) {
                 this.form.at(i).setValue(formArray.at(i).value);
+            }
+
+            if (i === this.form.length) {
+                this.form.push(new FormGroup({
+                    nonTerminal: new FormControl(''),
+                    production: new FormControl(''),
+                }));
             }
         } else {
             this.form = formArray;
+
+            this.form.push(new FormGroup({
+                nonTerminal: new FormControl(''),
+                production: new FormControl(''),
+            }));
         }
     }
 

@@ -145,7 +145,7 @@ describe('GrammarFormViewComponent', () => {
             () => {
                 const buttons = fixture.debugElement.queryAll(By.css('button'));
 
-                const rules = Object.values(hostComponent.grammar.rules);
+                const rules = hostComponent.grammar.rules;
 
                 expect(buttons.length).toBe(rules.length - 1);
 

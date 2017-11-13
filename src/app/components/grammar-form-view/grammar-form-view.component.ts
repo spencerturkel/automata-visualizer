@@ -43,26 +43,24 @@ const grammarToForm =
                 ),
                 production: new FormControl(fromKleeneStar(production)),
             }));
-        return new FormArray([
-            ...controls, new FormGroup({
-                nonTerminal: new FormControl(''),
-                production: new FormControl(''),
-            }),
-        ]);
+
+        return new FormArray(controls);
     };
 
 const formToGrammar =
     (formValue: FormValue): Grammar<any, any> => {
+        const rules = formValue.filter(value => value.nonTerminal !== '');
+
         return {
             start: formValue[0].nonTerminal,
             nonTerminals: Array.from(new Set(formValue.map(x => x.nonTerminal))),
-            rules: formValue.reduce((prev, next) => next.nonTerminal !== '' ? ([
+            rules: rules.reduce((prev, next) => ([
                 ...prev,
                 {
                     nonTerminal: next.nonTerminal,
                     production: toKleeneStar(next.production),
                 },
-            ]) : prev, []),
+            ]), []),
         };
     };
 
@@ -73,26 +71,17 @@ const formToGrammar =
 export class GrammarFormViewComponent<NonTerminal extends string, Terminal extends string>
     implements OnChanges, OnInit {
     @Input() grammar: Grammar<NonTerminal, Terminal>;
-    @Output() removeRule = new EventEmitter<number>();
     @Output() submit = new EventEmitter<Grammar<NonTerminal, Terminal>>();
 
     form: FormArray;
-
-    addBlankRule(): void {
-        this.form.push(new FormGroup({
-            nonTerminal: new FormControl(
-                '',
-                [Validators.minLength(1), Validators.maxLength(1)],
-            ),
-            production: new FormControl(''),
-        }));
-    }
 
     ngOnChanges() {
         const formArray = grammarToForm(this.grammar);
 
         if (this.form) {
-            this.form.setValue(formArray.controls);
+            for (let i = 0; i < formArray.value.length; ++i) {
+                this.form.at(i).setValue(formArray.at(i).value);
+            }
         } else {
             this.form = formArray;
         }
@@ -102,9 +91,29 @@ export class GrammarFormViewComponent<NonTerminal extends string, Terminal exten
         this.form.valueChanges
             .pipe(
                 filter(() => this.form.valid),
+                map((value: FormValue) => value.filter(({nonTerminal}) => nonTerminal !== '')),
                 map(value => formToGrammar(value)),
             )
             .subscribe(grammar => this.submit.emit(grammar));
+    }
+
+    onFocusLast(): void {
+        const row = this.form.controls[this.form.length - 1] as FormGroup;
+
+        if (row.get('nonTerminal')!.value === '') {
+            return;
+        }
+
+        row.controls.nonTerminal.setValidators([
+            Validators.required,
+            Validators.minLength(1),
+            Validators.maxLength(1),
+        ]);
+
+        this.form.push(new FormGroup({
+            nonTerminal: new FormControl(''),
+            production: new FormControl(''),
+        }));
     }
 
     onRemoveRule(ruleIndex: number): void {

@@ -18,10 +18,10 @@
                 </span>
             </td>
             <td>
-                <input formControlName="nonTerminal">
+                <input formControlName="nonTerminal" (ngModelChange)="isLast && $event !== '' && onFocusLast()">
             </td>
             <td>
-                <input formControlName="production" (focus)="isLast && addBlankRule()">
+                <input formControlName="production" (focus)="isLast && onFocusLast()">
             </td>
             <td>
                 <button

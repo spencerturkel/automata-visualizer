@@ -43,7 +43,12 @@ const grammarToForm =
                 ),
                 production: new FormControl(fromKleeneStar(production)),
             }));
-        return new FormArray(controls);
+        return new FormArray([
+            ...controls, new FormGroup({
+                nonTerminal: new FormControl(''),
+                production: new FormControl(''),
+            }),
+        ]);
     };
 
 const formToGrammar =

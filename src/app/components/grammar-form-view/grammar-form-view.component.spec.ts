@@ -107,6 +107,13 @@ describe('GrammarFormViewComponent', () => {
             const rules = Object.values(hostComponent.grammar.rules);
 
             expect(buttons.length).toBe(rules.length - 1);
+
+            spyOn(component, 'onRemoveRule');
+
+            for (const [removeButton, index] of buttons.map((btn, ix) => [btn, ix + 1] as [DebugElement, number])) {
+                removeButton.triggerEventHandler('click', null);
+                expect(component.onRemoveRule).toHaveBeenCalledWith(index);
+            }
         });
     });
 });

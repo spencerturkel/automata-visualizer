@@ -3,7 +3,7 @@ import {TestBed, async} from '@angular/core/testing';
 import {Store, StoreModule} from '@ngrx/store';
 
 import {AppComponent} from './app.component';
-import {AppStore, reducer} from './reducers';
+import {AppStore, reducers} from './reducers';
 import {DotSource} from './models/dot-source';
 import {DotConverter} from './services/dot-converter.service';
 
@@ -17,7 +17,7 @@ describe('AppComponent', () => {
             declarations: [
                 AppComponent,
             ],
-            imports: [StoreModule.forRoot(reducer)],
+            imports: [StoreModule.forRoot(reducers)],
             providers: [
                 {provide: AppStore, useClass: Store},
                 {provide: DotConverter, useValue: converter},

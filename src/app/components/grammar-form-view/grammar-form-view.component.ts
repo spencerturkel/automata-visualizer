@@ -34,7 +34,10 @@ const grammarToForm =
         const controls = grammar.nonTerminals
             .map(nonTerminal => grammar.rules[nonTerminal]
                 .map(rule => new FormGroup({
-                    nonTerminal: new FormControl(nonTerminal, Validators.required),
+                    nonTerminal: new FormControl(
+                        nonTerminal,
+                        [Validators.required, Validators.minLength(1), Validators.maxLength(1)],
+                    ),
                     production: new FormControl(fromKleeneStar(rule.production)),
                 })))
             .reduce((all, next) => all.concat(next), []);

@@ -5,6 +5,7 @@ import {By} from '@angular/platform-browser';
 import {Subject} from 'rxjs/Subject';
 
 import {Grammar} from '../../models/grammar';
+import {Environment} from '../../services/environment.service';
 import {GrammarFormViewComponent} from './grammar-form-view.component';
 
 type TestNonTerminals = 'S' | 'A';
@@ -22,36 +23,32 @@ class TestHostComponent {
     grammar: TestGrammar = {
         start: 'S',
         nonTerminals: ['S', 'A'],
-        rules: {
-            S: [
-                {
-                    nonTerminal: 'S',
-                    production: {
-                        val: 'A',
-                        rest: '',
-                    },
+        rules: [
+            {
+                nonTerminal: 'S',
+                production: {
+                    val: 'A',
+                    rest: '',
                 },
-            ],
-            A: [
-                {
-                    nonTerminal: 'A',
-                    production: {
-                        val: 'a',
+            },
+            {
+                nonTerminal: 'A',
+                production: {
+                    val: 'a',
+                    rest: {
+                        val: 'A',
                         rest: {
-                            val: 'A',
-                            rest: {
-                                val: 'b',
-                                rest: '',
-                            },
+                            val: 'b',
+                            rest: '',
                         },
                     },
                 },
-                {
-                    nonTerminal: 'A',
-                    production: '',
-                },
-            ],
-        },
+            },
+            {
+                nonTerminal: 'A',
+                production: '',
+            },
+        ],
     };
     submit$ = new Subject<TestGrammar>();
 }

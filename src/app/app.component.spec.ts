@@ -6,6 +6,7 @@ import {AppComponent} from './app.component';
 import {AppStore, reducers} from './reducers';
 import {DotSource} from './models/dot-source';
 import {DotConverter} from './services/dot-converter.service';
+import {Environment} from './services/environment.service';
 
 describe('AppComponent', () => {
     let converter: DotConverter;
@@ -21,6 +22,7 @@ describe('AppComponent', () => {
             providers: [
                 {provide: AppStore, useClass: Store},
                 {provide: DotConverter, useValue: converter},
+                {provide: Environment, useValue: {production: true}},
             ],
             schemas: [NO_ERRORS_SCHEMA],
         }).compileComponents();

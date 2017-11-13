@@ -4,6 +4,7 @@ import {map} from 'rxjs/operators';
 
 import {NewGrammar} from './actions/index';
 import {DotSource} from './models/dot-source';
+import {Environment} from './services/environment.service';
 import {Grammar} from './models/grammar';
 import {AppStore, selectGrammar} from './reducers';
 import {DotConverter} from './services/dot-converter.service';
@@ -13,13 +14,16 @@ import {DotConverter} from './services/dot-converter.service';
     templateUrl: './app.component.html',
 })
 export class AppComponent {
+    readonly development: boolean;
     readonly dot$: Observable<DotSource>;
     readonly grammar$: Observable<Grammar<any, any>>;
 
     constructor(
         private readonly converter: DotConverter,
+        {production}: Environment,
         private readonly store: AppStore,
     ) {
+        this.development = !production;
         this.grammar$ = this.store.select(selectGrammar);
         this.dot$ = this.grammar$.pipe(map(grammar => converter.convert(grammar)));
     }

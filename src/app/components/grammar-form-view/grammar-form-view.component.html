@@ -24,10 +24,15 @@
                 <input formControlName="nonTerminal" required>
             </td>
             <td>
-                <input formControlName="production">
+                <input formControlName="production" (focus)="isLast && addBlankRule()">
             </td>
             <td>
-                <button type="button" *ngIf="!(isFirst || isLast)" (click)="onRemoveRule(ruleIndex)"></button>
+                <button
+                    *ngIf="!(isFirst || isLast)"
+                    (click)="onRemoveRule(ruleIndex)"
+                    type="button">
+                    Remove
+                </button>
             </td>
         </tr>
         </tbody>

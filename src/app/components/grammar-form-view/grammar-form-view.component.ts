@@ -32,14 +32,18 @@ const grammarToForm =
     <NonTerminal extends string, Terminal extends string>
     (grammar: Grammar<NonTerminal, Terminal>): FormArray => {
         const controls = grammar.nonTerminals
-            .map(nonTerminal => grammar.rules[nonTerminal]
-                .map(rule => new FormGroup({
-                    nonTerminal: new FormControl(
-                        nonTerminal,
-                        [Validators.required, Validators.minLength(1), Validators.maxLength(1)],
-                    ),
-                    production: new FormControl(fromKleeneStar(rule.production)),
-                })))
+            .map(nonTerminal => {
+                const grammarRules = grammar.rules[nonTerminal];
+
+                return grammarRules
+                    .map(rule => new FormGroup({
+                        nonTerminal: new FormControl(
+                            nonTerminal,
+                            [Validators.required, Validators.minLength(1), Validators.maxLength(1)],
+                        ),
+                        production: new FormControl(fromKleeneStar(rule.production)),
+                    }));
+            })
             .reduce((all, next) => all.concat(next), []);
         return new FormArray(controls);
     };
@@ -48,11 +52,13 @@ const formToGrammar =
     (formValue: FormValue): Grammar<any, any> => {
         return {
             start: formValue[0].nonTerminal,
-            nonTerminals: formValue.map(x => x.nonTerminal),
+            nonTerminals: Array.from(new Set(formValue.map(x => x.nonTerminal))),
             rules: formValue.reduce((prev, next) => next.nonTerminal ? ({
                 ...prev,
-                nonTerminal: next.nonTerminal,
-                production: toKleeneStar(next.production),
+                [next.nonTerminal]: [{
+                    nonTerminal: next.nonTerminal,
+                    production: toKleeneStar(next.production),
+                }, ...((prev as any)[next.nonTerminal] || [])],
             }) : prev, {}),
         };
     };
@@ -68,6 +74,16 @@ export class GrammarFormViewComponent<NonTerminal extends string, Terminal exten
     @Output() submit = new EventEmitter<Grammar<NonTerminal, Terminal>>();
 
     form: FormArray;
+
+    addBlankRule(): void {
+        this.form.push(new FormGroup({
+            nonTerminal: new FormControl(
+                '',
+                [Validators.required, Validators.minLength(1), Validators.maxLength(1)],
+            ),
+            production: new FormControl(''),
+        }));
+    }
 
     ngOnChanges() {
         this.form = grammarToForm(this.grammar);

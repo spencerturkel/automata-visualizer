@@ -21,7 +21,7 @@
                 </span>
             </td>
             <td>
-                <input formControlName="nonTerminal" required>
+                <input formControlName="nonTerminal">
             </td>
             <td>
                 <input formControlName="production" (focus)="isLast && addBlankRule()">
@@ -38,3 +38,20 @@
         </tbody>
     </table>
 </form>
+<div *ngIf="form.invalid">
+    Overall Errors: {{form.errors | json}}
+    Control Errors:
+    <ul>
+        <li *ngFor="let control of form.controls">
+            Group Errors: {{control.errors | json}}
+            <ul>
+                <li>
+                    NonTerminal Errors: {{control.controls['nonTerminal'].errors | json}}
+                </li>
+                <li>
+                    Production Errors: {{control.controls['production'].errors | json}}
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>

@@ -6,12 +6,12 @@ export type State<NonTerminal extends string, Terminal extends string> = Grammar
 export const initialState: State<'S', ''> = {
     nonTerminals: ['S'],
     start: 'S',
-    rules: {
-        'S': [{
+    rules: [
+        {
             nonTerminal: 'S',
             production: '',
-        }],
-    },
+        },
+    ],
 };
 
 export function reducer<NonTerminal extends string,

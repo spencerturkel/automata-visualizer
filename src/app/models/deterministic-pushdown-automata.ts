@@ -1,9 +1,9 @@
+import {PartialRecord} from './partial-record';
+
 export interface TransitionResult<State extends string, Stack extends string> {
     state: State;
     stack: Stack[];
 }
-
-type PartialRecord<Key extends string, Value> = Partial<Record<Key, Value>>;
 
 export interface DeterministicPushdownAutomata<State extends string, Input extends string, Stack extends string> {
     initialStack: Stack;

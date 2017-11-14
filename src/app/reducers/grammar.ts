@@ -1,3 +1,6 @@
+import {compose, createSelector} from '@ngrx/store';
+import deepmerge = require('deepmerge');
+
 import {Actions, NEW_GRAMMAR} from '../actions';
 import {Grammar} from '../models/grammar';
 import {PushdownAutomata} from '../models/pushdown-automata';
@@ -5,7 +8,6 @@ import {DeterministicPushdownAutomata} from '../models/deterministic-pushdown-au
 import {NonDeterministicFiniteAutomata} from '../models/nondeterministic-finite-automata';
 import {DeterministicFiniteAutomata} from '../models/deterministic-finite-automata';
 import {DotSource} from '../models/dot-source';
-import {compose, createSelector} from '@ngrx/store';
 
 export type State<NonTerminal extends string, Terminal extends string> = Grammar<NonTerminal, Terminal>;
 
@@ -70,9 +72,12 @@ export const id: <T>(t: T) => T = x => x;
 export const isLeftLinear: (grammar: Grammar<string, string>) => boolean =
         createSelector(selectNonTerminals, id,
             (nonTerminals, grammar) =>
-                grammar.every(({production}) =>
-                    production.filter(value => nonTerminals.includes(value)).length === 1
-                && nonTerminals.includes(production[production.length - 1])));
+                grammar.every(({production}) => {
+                    const nonTerminalsInProduction = production.filter(value => nonTerminals.includes(value));
+                    return nonTerminalsInProduction.length === 1
+                        && production[production.length - 1] === nonTerminalsInProduction[0] ||
+                        nonTerminalsInProduction.length === 0 && production.length === 1;
+                }));
 
 export const selectNFA:
     <NonTerminal extends string, Terminal extends string>(state: State<NonTerminal, Terminal>) =>
@@ -80,7 +85,42 @@ export const selectNFA:
     = grammar => ({
             startState: grammar[0].nonTerminal,
             accepting: ['accept'],
-            transition: isLeftLinear(grammar) ? ({}) : ({}),
+            transition: isLeftLinear(grammar) ? ({}) : (grammar.reduce(
+                (transitions, {nonTerminal, production}) => {
+                    if (production.length > 0) {
+                        const productionStateNames = production
+                            .slice(0, production.length - 1)
+                            .map((_, index) => production.slice(0, index).join(''));
+
+                        const productionTransitionResults = production
+                            .slice(1, production.length);
+
+                        const productionTransitions = productionStateNames.map((name, index) => {
+                            const transitionResult = productionTransitionResults[index];
+                            const transitionInput = transitionResult[transitionResult.length - 1];
+
+                            return {
+                                [transitionInput]: {
+                                    [name]: [transitionResult],
+                                },
+                            };
+                        });
+
+                        return deepmerge(transitions, productionTransitions.reduce(
+                            (all, next) => deepmerge(all, next),
+                            {}));
+                    } else {
+                        const newTransitions = {
+                            [production[0] as string]: {
+                                [nonTerminal as string]: ['accept'],
+                            },
+                        };
+
+                        return deepmerge(transitions, newTransitions);
+                    }
+                },
+                {},
+            )),
         }); // TODO
 
 export const NFAToDot:

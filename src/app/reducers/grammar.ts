@@ -8,6 +8,7 @@ import {DeterministicPushdownAutomata} from '../models/deterministic-pushdown-au
 import {NonDeterministicFiniteAutomata} from '../models/nondeterministic-finite-automata';
 import {DeterministicFiniteAutomata} from '../models/deterministic-finite-automata';
 import {DotSource} from '../models/dot-source';
+import {PartialRecord} from '../models/partial-record';
 
 export type State<NonTerminal extends string, Terminal extends string> = Grammar<NonTerminal, Terminal>;
 
@@ -92,7 +93,10 @@ const PDAToDot: <PDAState extends string, Input extends string, Stack extends st
             .map(transition => ({
                 from: transition.state,
                 to: transition.result.state,
-                labels: [`${transition.input || '&lambda;'}, ${showStack(transition.stack)} | ${transition.result.stack.map(showStack).join('')}`],
+                labels: [
+                    `${transition.input || '&lambda;'}, ${showStack(transition.stack)} | ${transition.result.stack.map(
+                        showStack).join('')}`,
+                ],
             }))
             .map(({from, to, labels}) => ({
                 [from + ' -> ' + to]: labels,
@@ -143,49 +147,101 @@ export const isLeftLinear: (grammar: Grammar<string, string>) => boolean =
             }),
     );
 
-export const selectNFA: <NonTerminal extends string, Terminal extends string>(state: State<NonTerminal, Terminal>) =>
-    NonDeterministicFiniteAutomata<string, Terminal>
-    = grammar => ({
-    startState: grammar[0].nonTerminal,
-    accepting: ['accept'],
-    transition: isLeftLinear(grammar) ? ({}) : (grammar.reduce(
-        (transitions, {nonTerminal, production}) => {
-            if (production.length > 0) {
-                const productionStateNames = production
-                    .slice(0, production.length - 1)
-                    .map((_, index) => production.slice(0, index).join(''));
+export const selectLeftLinearNFATransitions: <NonTerminal extends string, Terminal extends string>(grammar: Grammar<NonTerminal, Terminal>) =>
+    PartialRecord<Terminal | '', PartialRecord<string, string[]>>
+    = createSelector(
+    selectNonTerminals,
+    id,
+    <NonTerminal extends string, Terminal extends string>(
+        nonTerminals: NonTerminal[],
+        grammar: Grammar<NonTerminal, Terminal>,
+    ) => grammar.reduce(
+        (transitions, {nonTerminal: variable, production: rule}) => {
+            const finalTransitionResult = !nonTerminals.includes(rule[0] as NonTerminal) ?
+                'accept' :
+                rule[0];
 
-                const productionTransitionResults = production
-                    .slice(1, production.length);
+            const production = [finalTransitionResult, ...rule.slice(rule.length - 1, 0)];
 
-                const productionTransitions = productionStateNames.map((name, index) => {
-                    const transitionResult = productionTransitionResults[index];
-                    const transitionInput = transitionResult[transitionResult.length - 1];
+            const productionStateNames = production
+                .slice(production.length - 1, 0)
+                .map((_, index) => production.slice(index - 1, 0).join(''))
+                .map(name => variable + name);
 
-                    return {
-                        [transitionInput]: {
-                            [name]: [transitionResult],
-                        },
-                    };
-                });
+            const productionTransitionResults = [...productionStateNames.slice(1), finalTransitionResult];
 
-                return deepmerge(transitions, productionTransitions.reduce(
-                    (all, next) => deepmerge(all, next),
-                    {},
-                ));
-            } else {
-                const newTransitions = {
-                    [production[0] as string]: {
-                        [nonTerminal as string]: ['accept'],
+            const productionTransitions = productionStateNames.map((name, index) => {
+                const transitionResult = productionTransitionResults[index];
+                const transitionInput = transitionResult[transitionResult.length - 1];
+
+                return {
+                    [transitionInput]: {
+                        [name]: [transitionResult],
                     },
                 };
+            });
 
-                return deepmerge(transitions, newTransitions);
-            }
+            return deepmerge(transitions, productionTransitions.reduce(
+                (all, next) => deepmerge(all, next),
+                {},
+            ));
         },
         {},
-    )),
-}); // TODO
+    ),
+);
+
+export const selectRightLinearNFATransitions: <NonTerminal extends string, Terminal extends string>(grammar: Grammar<NonTerminal, Terminal>) =>
+    PartialRecord<Terminal | '', PartialRecord<string, string[]>>
+    = createSelector(
+    selectNonTerminals,
+    id,
+    <NonTerminal extends string, Terminal extends string>(
+        nonTerminals: NonTerminal[],
+        grammar: Grammar<NonTerminal, Terminal>,
+    ) => grammar.reduce(
+        (transitions, {nonTerminal: variable, production: rule}) => {
+            const finalTransitionResult = !nonTerminals.includes(rule[rule.length - 1] as NonTerminal) ?
+                'accept' :
+                rule[rule.length - 1];
+
+            const production = [...rule.slice(0, rule.length - 1), finalTransitionResult];
+
+            const productionStateNames = production
+                .slice(0, production.length - 1)
+                .map((_, index) => production.slice(0, index + 1).join(''))
+                .map(name => variable + name);
+
+            const productionTransitionResults = [...productionStateNames.slice(1), finalTransitionResult];
+
+            const productionTransitions = productionStateNames.map((name, index) => {
+                const transitionResult = productionTransitionResults[index];
+                const transitionInput = transitionResult[transitionResult.length - 1];
+
+                return {
+                    [transitionInput]: {
+                        [name]: [transitionResult],
+                    },
+                };
+            });
+
+            return deepmerge(transitions, productionTransitions.reduce(
+                (all, next) => deepmerge(all, next),
+                {},
+            ));
+        },
+        {},
+    ),
+);
+
+export const selectNFA: <NonTerminal extends string, Terminal extends string>(state: State<NonTerminal, Terminal>) =>
+    NonDeterministicFiniteAutomata<string, Terminal>
+    = createSelector(isLeftLinear, id, (leftLinear, grammar) => ({
+    startState: grammar[0].nonTerminal,
+    accepting: ['accept'],
+    transition: (leftLinear
+        ? selectLeftLinearNFATransitions(grammar)
+        : selectRightLinearNFATransitions(grammar)) as any,
+}));
 
 export const NFAToDot: <NFAState extends string, Input extends string>
 (nfa: NonDeterministicFiniteAutomata<NFAState, Input>) =>

@@ -7,7 +7,14 @@ import {NewGrammar} from './actions/index';
 import {DotSource} from './models/dot-source';
 import {Environment} from './services/environment.service';
 import {Grammar} from './models/grammar';
-import {selectGrammar, State} from './reducers';
+import {
+    selectGrammar,
+    selectGrammarDPDADot,
+    selectGrammarDFADot,
+    selectGrammarNFADot,
+    selectGrammarPDADot,
+    State,
+} from './reducers';
 
 @Component({
     selector: 'av-root',
@@ -15,14 +22,21 @@ import {selectGrammar, State} from './reducers';
 })
 export class AppComponent {
     readonly development: boolean;
+
     readonly dot$: Observable<DotSource>;
     readonly grammar$: Observable<Grammar<any, any>>;
+
+    // readonly pda$: Observable<DotSource>;
+    // readonly dpda$: Observable<DotSource>;
+    // readonly nfa$: Observable<DotSource>;
+    // readonly dfa$: Observable<DotSource>;
 
     constructor(
         {production}: Environment,
         private readonly store: Store<State<any, any>>,
     ) {
         this.development = !production;
+
         this.grammar$ = this.store.select(selectGrammar);
         this.dot$ = of(new DotSource(`
                 digraph G {
@@ -30,6 +44,11 @@ export class AppComponent {
                     "To" -> "Web"
                     "To" -> "GraphViz!"
                 }`));
+
+        // this.pda$ = this.store.select(selectGrammarPDADot);
+        // this.dpda$ = this.store.select(selectGrammarDPDADot);
+        // this.nfa$ = this.store.select(selectGrammarNFADot);
+        // this.dfa$ = this.store.select(selectGrammarDFADot);
     }
 
     onSubmit(grammar: Grammar<any, any>) {

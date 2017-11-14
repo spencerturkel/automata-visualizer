@@ -1,4 +1,4 @@
-import {ActionReducerMap, createFeatureSelector} from '@ngrx/store';
+import {ActionReducerMap, createFeatureSelector, createSelector} from '@ngrx/store';
 
 import * as fromGrammar from './grammar';
 
@@ -11,3 +11,11 @@ export const reducers: ActionReducerMap<State<any, any>> = {
 };
 
 export const selectGrammar = createFeatureSelector<fromGrammar.State<any, any>>('grammar');
+
+export const selectGrammarPDADot = createSelector(selectGrammar, fromGrammar.selectPDADot);
+
+export const selectGrammarDPDADot = createSelector(selectGrammar, fromGrammar.selectDPDADot);
+
+export const selectGrammarNFADot = createSelector(selectGrammar, fromGrammar.selectNFADot);
+
+export const selectGrammarDFADot = createSelector(selectGrammar, fromGrammar.selectDFADot);

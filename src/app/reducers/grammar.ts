@@ -60,10 +60,28 @@ export const DPDAToDot:
 // export const selectDPDADot = createSelector(selectDPDA, DPDAToDot); // TODO
 export const selectDPDADot = compose(selectDPDA, DPDAToDot); // TODO
 
+export const selectNonTerminals:
+    <NonTerminal extends string>(grammar: Grammar<NonTerminal, string>)
+        => NonTerminal[]
+    = grammar => grammar.map(rule => rule.nonTerminal);
+
+export const id: <T>(t: T) => T = x => x;
+
+export const isLeftLinear: (grammar: Grammar<string, string>) => boolean =
+        createSelector(selectNonTerminals, id,
+            (nonTerminals, grammar) =>
+                grammar.every(({production}) =>
+                    production.filter(value => nonTerminals.includes(value)).length === 1
+                && nonTerminals.includes(production[production.length - 1])));
+
 export const selectNFA:
     <NonTerminal extends string, Terminal extends string>(state: State<NonTerminal, Terminal>) =>
-        NonDeterministicFiniteAutomata<any, Terminal>
-    = null as any; // TODO
+        NonDeterministicFiniteAutomata<string, Terminal>
+    = grammar => ({
+            startState: grammar[0].nonTerminal,
+            accepting: ['accept'],
+            transition: isLeftLinear(grammar) ? ({}) : ({}),
+        }); // TODO
 
 export const NFAToDot:
     <NFAState extends string, Input extends string>

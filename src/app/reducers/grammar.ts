@@ -1,5 +1,5 @@
 import {compose, createSelector} from '@ngrx/store';
-import deepmerge = require('deepmerge');
+import * as deepmerge from 'deepmerge';
 
 import {Actions, NEW_GRAMMAR} from '../actions';
 import {Grammar} from '../models/grammar';

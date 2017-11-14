@@ -7,7 +7,7 @@ export interface Transition<State extends string, Input extends string, Stack ex
     state: State;
     input: Input | '';
     stack: Stack;
-    result: TransitionResult<State, Stack> | null;
+    result: TransitionResult<State, Stack>;
 }
 
 export interface PushdownAutomata<State extends string, Input extends string, Stack extends string> {

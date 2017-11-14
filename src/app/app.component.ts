@@ -26,7 +26,7 @@ export class AppComponent {
     readonly dot$: Observable<DotSource>;
     readonly grammar$: Observable<Grammar<any, any>>;
 
-    // readonly pda$: Observable<DotSource>;
+    readonly pda$: Observable<DotSource>;
     // readonly dpda$: Observable<DotSource>;
     // readonly nfa$: Observable<DotSource>;
     // readonly dfa$: Observable<DotSource>;
@@ -45,7 +45,7 @@ export class AppComponent {
                     "To" -> "GraphViz!"
                 }`));
 
-        // this.pda$ = this.store.select(selectGrammarPDADot);
+        this.pda$ = this.store.select(selectGrammarPDADot);
         // this.dpda$ = this.store.select(selectGrammarDPDADot);
         // this.nfa$ = this.store.select(selectGrammarNFADot);
         // this.dfa$ = this.store.select(selectGrammarDFADot);

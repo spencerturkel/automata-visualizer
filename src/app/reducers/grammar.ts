@@ -80,10 +80,13 @@ export const selectPDA: <NonTerminal extends string, Terminal extends string>(st
     PushdownAutomata<'start' | 'rules' | 'done', Terminal, NonTerminal | Terminal>
     = null as any; // TODO Section 7.2 Theorem 7.1
 
-export const PDAToDot: <PDAState extends string, Input extends string, Stack extends string>
+const PDAToDot: <PDAState extends string, Input extends string, Stack extends string>
 (pda: PushdownAutomata<PDAState, Input, Stack>) =>
     DotSource
     = pda => {
+    console.log('showing pda', pda);
+
+    const showStack = (stack: string) => stack === 'ZZ' ? 'Z' : stack;
 
     const nodes =
         pda.transition
@@ -91,7 +94,7 @@ export const PDAToDot: <PDAState extends string, Input extends string, Stack ext
             .map(transition => ({
                 from: transition.state,
                 to: transition.result.state,
-                label: `${transition.input}, ${transition.stack} | ${transition.result.stack.join('')}`,
+                label: `${transition.input || '&lambda;'}, ${showStack(transition.stack)} | ${transition.result.stack.map(showStack).join('')}`,
             }));
 
     return new DotSource(`
@@ -106,7 +109,7 @@ export const PDAToDot: <PDAState extends string, Input extends string, Stack ext
 };
 
 // export const selectPDADot = createSelector(selectPDA, PDAToDot); // TODO
-export const selectPDADot = compose(selectPDA, PDAToDot); // TODO
+export const selectPDADot = createSelector(selectGNF, createSelector(selectPDAFromGNF, PDAToDot));
 
 export const selectDPDA: <NonTerminal extends string, Terminal extends string>(state: State<NonTerminal, Terminal>) =>
     DeterministicPushdownAutomata<any, Terminal, NonTerminal | Terminal>

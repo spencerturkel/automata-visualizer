@@ -3,16 +3,12 @@ import {Grammar} from '../models/grammar';
 
 export type State<NonTerminal extends string, Terminal extends string> = Grammar<NonTerminal, Terminal>;
 
-export const initialState: State<'S', ''> = {
-    nonTerminals: ['S'],
-    start: 'S',
-    rules: [
-        {
-            nonTerminal: 'S',
-            production: '',
-        },
-    ],
-};
+export const initialState: State<'S', ''> = [
+    {
+        nonTerminal: 'S',
+        production: [''],
+    },
+];
 
 export function reducer<NonTerminal extends string,
     Terminal extends string,

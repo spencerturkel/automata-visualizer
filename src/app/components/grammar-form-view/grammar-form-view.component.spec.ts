@@ -5,9 +5,7 @@ import {By} from '@angular/platform-browser';
 import {Subject} from 'rxjs/Subject';
 
 import {Grammar} from '../../models/grammar';
-import {Environment} from '../../services/environment.service';
 import {GrammarFormViewComponent} from './grammar-form-view.component';
-import {GrammarRule} from '../../models/grammar-rule';
 
 type TestNonTerminals = 'S' | 'A';
 type TestTerminals = 'a' | 'b';
@@ -21,36 +19,20 @@ type TestGrammar = Grammar<TestNonTerminals, TestTerminals>;
     `,
 })
 class TestHostComponent {
-    grammar: TestGrammar = {
-        start: 'S',
-        nonTerminals: ['S', 'A'],
-        rules: [
+    grammar: TestGrammar = [
             {
                 nonTerminal: 'S',
-                production: {
-                    val: 'A',
-                    rest: '',
-                },
+                production: ['A'],
             },
             {
                 nonTerminal: 'A',
-                production: {
-                    val: 'a',
-                    rest: {
-                        val: 'A',
-                        rest: {
-                            val: 'b',
-                            rest: '',
-                        },
-                    },
-                },
+                production: ['a', 'A', 'b'],
             },
             {
                 nonTerminal: 'A',
-                production: '',
+                production: [],
             },
-        ],
-    };
+    ];
     submit$ = new Subject<TestGrammar>();
 }
 
@@ -96,15 +78,13 @@ describe('GrammarFormViewComponent', () => {
 
         describe('inputs', () => {
             let inputs: DebugElement[];
-            let rules: GrammarRule<string, string>[];
 
             beforeEach(() => {
                 inputs = fixture.debugElement.queryAll(By.css('input'));
-                rules = hostComponent.grammar.rules;
             });
 
             it('should be enough for the grammar and the new rule', () => {
-                expect(inputs.length).toBe((rules.length + 1) * 2);
+                expect(inputs.length).toBe((hostComponent.grammar.length + 1) * 2);
             });
 
             it('should connect to form', () => {
@@ -145,7 +125,7 @@ describe('GrammarFormViewComponent', () => {
             () => {
                 const buttons = fixture.debugElement.queryAll(By.css('button'));
 
-                const rules = hostComponent.grammar.rules;
+                const rules = hostComponent.grammar;
 
                 expect(buttons.length).toBe(rules.length - 1);
 

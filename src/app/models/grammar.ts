@@ -1,8 +1,4 @@
 import {GrammarRule} from './grammar-rule';
 
-export interface Grammar<NonTerminal extends string, Terminal extends string> {
-    nonTerminals: NonTerminal[];
-    rules: GrammarRule<NonTerminal, Terminal>[];
-    start: NonTerminal;
-}
+export type Grammar<NonTerminal extends string, Terminal extends string> = GrammarRule<NonTerminal, Terminal>[];
 

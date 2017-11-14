@@ -1,9 +1,8 @@
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output} from '@angular/core';
 import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
-import {filter, map, tap} from 'rxjs/operators';
+import {filter, map} from 'rxjs/operators';
 
 import {Grammar} from '../../models/grammar';
-import {fromKleeneStar, toKleeneStar} from '../../models/kleene-star';
 
 /*
 const exampleFormValue = new FormArray([
@@ -31,8 +30,8 @@ type FormValue = { nonTerminal: string, production: string }[];
 const grammarToForm =
     <NonTerminal extends string, Terminal extends string>
     (grammar: Grammar<NonTerminal, Terminal>): FormArray => {
-        const controls = grammar.rules
-            .map(({nonTerminal, production}, index) => new FormGroup({
+        const controls = grammar
+            .map(({nonTerminal, production}) => new FormGroup({
                 nonTerminal: new FormControl(
                     nonTerminal,
                     [
@@ -41,7 +40,7 @@ const grammarToForm =
                         Validators.maxLength(1),
                     ],
                 ),
-                production: new FormControl(fromKleeneStar(production)),
+                production: new FormControl(production.join('')),
             }));
 
         return new FormArray(controls);
@@ -51,17 +50,13 @@ const formToGrammar =
     (formValue: FormValue): Grammar<any, any> => {
         const rules = formValue.filter(value => value.nonTerminal !== '');
 
-        return {
-            start: formValue[0].nonTerminal,
-            nonTerminals: Array.from(new Set(formValue.map(x => x.nonTerminal))),
-            rules: rules.reduce((prev, next) => ([
-                ...prev,
-                {
-                    nonTerminal: next.nonTerminal,
-                    production: toKleeneStar(next.production),
-                },
-            ]), []),
-        };
+        return rules.reduce((prev, next) => ([
+            ...prev,
+            {
+                nonTerminal: next.nonTerminal,
+                production: next.production.split(''),
+            },
+        ]), []);
     };
 
 @Component({
@@ -104,8 +99,7 @@ export class GrammarFormViewComponent<NonTerminal extends string, Terminal exten
         this.form.valueChanges
             .pipe(
                 filter(() => this.form.valid),
-                map((value: FormValue) => value.filter(({nonTerminal}) => nonTerminal !== '')),
-                map(value => formToGrammar(value)),
+                map((value: FormValue) => formToGrammar(value.filter(({nonTerminal}) => nonTerminal !== ''))),
             )
             .subscribe(grammar => this.submit.emit(grammar));
     }

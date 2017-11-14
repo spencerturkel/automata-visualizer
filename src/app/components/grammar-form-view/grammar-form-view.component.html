@@ -19,6 +19,7 @@
             </td>
             <td>
                 <input formControlName="nonTerminal" (ngModelChange)="isLast && $event !== '' && onFocusLast()">
+                &rarr;
             </td>
             <td>
                 <input formControlName="production" (focus)="isLast && onFocusLast()">

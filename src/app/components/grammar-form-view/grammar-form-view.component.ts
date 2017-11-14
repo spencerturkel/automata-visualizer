@@ -84,10 +84,8 @@ export class GrammarFormViewComponent<NonTerminal extends string, Terminal exten
         if (this.form) {
             let i;
             for (i = 0; i < formArray.length; ++i) {
-                console.log(`updating index ${i}`);
                 this.form.at(i).setValue(formArray.at(i).value, {emitEvent: false});
             }
-            console.log('done updating array');
 
             if (i === this.form.length) {
                 this.form.push(new FormGroup({

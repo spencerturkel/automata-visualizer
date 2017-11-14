@@ -60,13 +60,13 @@ const selectPDAFromGNF:
                         nonTerminal,
                         production: production.length === 2 ? production : [production[0], ''],
                     }))
-                    .map(({nonTerminal, production: [a, u]}) => ({
+                    .map(({nonTerminal, production}) => ({
                         state: 'rules' as 'rules',
-                        input: u as '',
+                        input: production[0] as '',
                         stack: nonTerminal,
                         result: {
                             state: 'rules' as 'rules',
-                            stack: [a as 'ZZ']
+                            stack: production.slice(1) as any[],
                         },
                     })),
                 {

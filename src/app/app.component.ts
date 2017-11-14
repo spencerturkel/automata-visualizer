@@ -23,7 +23,6 @@ import {
 export class AppComponent {
     readonly development: boolean;
 
-    readonly dot$: Observable<DotSource>;
     readonly grammar$: Observable<Grammar<any, any>>;
 
     readonly pda$: Observable<DotSource>;
@@ -38,13 +37,6 @@ export class AppComponent {
         this.development = !production;
 
         this.grammar$ = this.store.select(selectGrammar);
-        this.dot$ = of(new DotSource(`
-                digraph G {
-                    "Welcome" -> "To"
-                    "To" -> "Web"
-                    "To" -> "GraphViz!"
-                }`));
-
         this.pda$ = this.store.select(selectGrammarPDADot);
         // this.dpda$ = this.store.select(selectGrammarDPDADot);
         // this.nfa$ = this.store.select(selectGrammarNFADot);

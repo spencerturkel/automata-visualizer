@@ -84,8 +84,6 @@ const PDAToDot: <PDAState extends string, Input extends string, Stack extends st
 (pda: PushdownAutomata<PDAState, Input, Stack>) =>
     DotSource
     = pda => {
-    console.log('showing pda', pda);
-
     const showStack = (stack: string) => stack === 'ZZ' ? 'Z' : stack;
 
     const nodes =

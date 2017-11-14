@@ -2,7 +2,6 @@ import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {SafeHtml} from '@angular/platform-browser';
 
 import {DotSource} from '../../models/dot-source';
-import {Environment} from '../../services/environment.service';
 import {Visualizer} from '../../services/visualizer.service';
 
 @Component({
@@ -13,14 +12,11 @@ import {Visualizer} from '../../services/visualizer.service';
 })
 export class AutomataViewComponent {
     @Input() readonly dot: DotSource;
-    readonly showSource: boolean;
     @Input() readonly title: string;
 
     constructor(
-        {production}: Environment,
         private readonly visualizer: Visualizer,
         ) {
-        this.showSource = !production;
     }
 
     get visualization(): SafeHtml {

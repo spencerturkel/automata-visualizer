@@ -1,8 +1,10 @@
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output} from '@angular/core';
 import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
-import {filter, map} from 'rxjs/operators';
+import {filter, map, tap} from 'rxjs/operators';
+import {Subscription} from 'rxjs/Subscription';
 
 import {Grammar} from '../../models/grammar';
+import {Observable} from 'rxjs/Observable';
 
 /*
 const exampleFormValue = new FormArray([
@@ -69,15 +71,23 @@ export class GrammarFormViewComponent<NonTerminal extends string, Terminal exten
     @Output() submit = new EventEmitter<Grammar<NonTerminal, Terminal>>();
 
     form: FormArray;
+    valueChangesSubscription: Subscription;
+    valueChanges$: Observable<Grammar<NonTerminal, Terminal>>;
 
     ngOnChanges() {
         const formArray = grammarToForm(this.grammar);
 
+        if (this.valueChangesSubscription) {
+            this.valueChangesSubscription.unsubscribe();
+        }
+
         if (this.form) {
             let i;
-            for (i = 0; i < formArray.value.length; ++i) {
-                this.form.at(i).setValue(formArray.at(i).value);
+            for (i = 0; i < formArray.length; ++i) {
+                console.log(`updating index ${i}`);
+                this.form.at(i).setValue(formArray.at(i).value, {emitEvent: false});
             }
+            console.log('done updating array');
 
             if (i === this.form.length) {
                 this.form.push(new FormGroup({
@@ -92,16 +102,19 @@ export class GrammarFormViewComponent<NonTerminal extends string, Terminal exten
                 nonTerminal: new FormControl(''),
                 production: new FormControl(''),
             }));
+
+            this.valueChanges$ =
+                this.form.valueChanges
+                    .pipe(
+                        filter(() => this.form.valid),
+                        map((value: FormValue) => formToGrammar(value.filter(({nonTerminal}) => nonTerminal !== ''))),
+                    );
         }
+
+        this.valueChangesSubscription = this.valueChanges$.subscribe(this.submit);
     }
 
     ngOnInit() {
-        this.form.valueChanges
-            .pipe(
-                filter(() => this.form.valid),
-                map((value: FormValue) => formToGrammar(value.filter(({nonTerminal}) => nonTerminal !== ''))),
-            )
-            .subscribe(grammar => this.submit.emit(grammar));
     }
 
     onFocusLast(): void {

@@ -4,8 +4,8 @@ declare module 'viz.js' {
 }
 
 interface VizOpts {
-    format?: string;
-    engine?: VizStringFormat;
+    format?: VizStringFormat;
+    engine?: 'circo' | 'dot' | 'neato' | 'osage' | 'twopi';
     scale?: number;
     images?: Image[];
     totalMemory?: number;

@@ -1,5 +1,5 @@
 import {compose, createSelector} from '@ngrx/store';
-import * as deepmerge from 'deepmerge';
+import deepmerge from 'deepmerge';
 
 import {Actions, NEW_GRAMMAR} from '../actions';
 import {Grammar} from '../models/grammar';
@@ -94,15 +94,22 @@ const PDAToDot: <PDAState extends string, Input extends string, Stack extends st
             .map(transition => ({
                 from: transition.state,
                 to: transition.result.state,
-                label: `${transition.input || '&lambda;'}, ${showStack(transition.stack)} | ${transition.result.stack.map(showStack).join('')}`,
-            }));
+                labels: [`${transition.input || '&lambda;'}, ${showStack(transition.stack)} | ${transition.result.stack.map(showStack).join('')}`],
+            }))
+            .map(({from, to, labels}) => ({
+                [from + ' -> ' + to]: labels,
+            }))
+            .reduce((all, next) => deepmerge(all, next), {});
 
     return new DotSource(`
     digraph {
+        rankdir=LR;
+        splines=true;
+        overlap = false;
         node [shape = doublecircle]; ${pda.accepting.join(' ')}
         node [shape = circle];
-        ${nodes.map(({from, to, label}) => `
-            ${from} -> ${to} [ label = "${label}" ];
+        ${Object.entries(nodes).map(([key, labels]) => `
+            ${key} [ label="${labels.join('\\n')}" ];
         `).join('\n')}
     }
     `);

@@ -1,7 +1,7 @@
 <h1>Automata Visualizer</h1>
 <av-grammar-form-view *ngIf="grammar$ | async as grammar" [grammar]="grammar"
                       (submit)="onSubmit($event)"></av-grammar-form-view>
-<av-automata-view *ngIf="dot$ | async as dot" [dot]="dot"></av-automata-view>
+<av-automata-view [dot]="dot$ | async" title="Test Title"></av-automata-view>
 <section>
     <h2>Grammar Data Structure</h2>
     <span>{{grammar$ | async | json}}</span>

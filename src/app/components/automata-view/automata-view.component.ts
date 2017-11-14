@@ -14,6 +14,7 @@ import {Visualizer} from '../../services/visualizer.service';
 export class AutomataViewComponent {
     @Input() readonly dot: DotSource;
     readonly showSource: boolean;
+    @Input() readonly title: string;
 
     constructor(
         {production}: Environment,
@@ -23,7 +24,6 @@ export class AutomataViewComponent {
     }
 
     get visualization(): SafeHtml {
-        console.log(this.dot);
         return this.visualizer.visualize(this.dot);
     }
 }

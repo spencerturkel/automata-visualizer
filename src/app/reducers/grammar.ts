@@ -117,7 +117,6 @@ const PDAToDot: <PDAState extends string, Input extends string, Stack extends st
     `);
 };
 
-// export const selectPDADot = createSelector(selectPDA, PDAToDot); // TODO
 export const selectPDADot = createSelector(selectGNF, createSelector(selectPDAFromGNF, PDAToDot));
 
 export const selectDPDA: <NonTerminal extends string, Terminal extends string>(state: State<NonTerminal, Terminal>) =>
@@ -157,9 +156,7 @@ export const selectLeftLinearNFATransitions: <NonTerminal extends string, Termin
         grammar: Grammar<NonTerminal, Terminal>,
     ) => grammar.reduce(
         (transitions, {nonTerminal: variable, production: rule}) => {
-            const finalTransitionResult = !nonTerminals.includes(rule[0] as NonTerminal) ?
-                'accept' :
-                rule[0];
+            const finalTransitionResult = !nonTerminals.includes(rule[0] as NonTerminal) ? 'accept' : rule[0];
 
             const production = [finalTransitionResult, ...rule.slice(rule.length - 1, 0)];
 
@@ -200,9 +197,9 @@ export const selectRightLinearNFATransitions: <NonTerminal extends string, Termi
         grammar: Grammar<NonTerminal, Terminal>,
     ) => grammar.reduce(
         (transitions, {nonTerminal: variable, production: rule}) => {
-            const finalTransitionResult = !nonTerminals.includes(rule[rule.length - 1] as NonTerminal) ?
-                'accept' :
-                rule[rule.length - 1];
+            const finalTransitionResult = !nonTerminals.includes(rule[rule.length - 1] as NonTerminal)
+                ? 'accept'
+                : rule[rule.length - 1];
 
             const production = [...rule.slice(0, rule.length - 1), finalTransitionResult];
 
@@ -246,7 +243,35 @@ export const selectNFA: <NonTerminal extends string, Terminal extends string>(st
 export const NFAToDot: <NFAState extends string, Input extends string>
 (nfa: NonDeterministicFiniteAutomata<NFAState, Input>) =>
     DotSource
-    = null as any; // TODO
+    = <NFAState extends string, Input extends string>
+(nfa: NonDeterministicFiniteAutomata<NFAState, Input>) => {
+    const labelsAndTransitions = [].concat(...[].concat(Object.entries(nfa.transition)
+        .map(([input, stateTransition]) => ({
+            label: input,
+            stateTransitions: Object.entries(stateTransition),
+        }))
+        .map(({label, stateTransitions}) =>
+            stateTransitions.map(([from, tos]) =>
+                tos.map((to: string) =>
+                    ({
+                        from,
+                        label,
+                        to,
+                    })))) as any)) as {from: string, to: string, label: string}[];
+
+    return new DotSource(`
+    digraph {
+        rankdir=LR;
+        splines=true;
+        overlap = false;
+        node [shape = doublecircle]; ${nfa.accepting.join(' ')}
+        node [shape = circle];
+        ${labelsAndTransitions.map(({from, label, to}) => `
+        ${from} -> ${to} [ label="${label}" ];
+        `)}
+    }
+    `);
+};
 
 // export const selectNFADot = createSelector(selectNFA, NFAToDot); // TODO
 export const selectNFADot = compose(selectNFA, NFAToDot); // TODO

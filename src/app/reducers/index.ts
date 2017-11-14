@@ -1,4 +1,4 @@
-import {ActionReducerMap, createFeatureSelector, Store} from '@ngrx/store';
+import {ActionReducerMap, createFeatureSelector} from '@ngrx/store';
 
 import * as fromGrammar from './grammar';
 

@@ -1,5 +1,10 @@
 import {Actions, NEW_GRAMMAR} from '../actions';
 import {Grammar} from '../models/grammar';
+import {PushdownAutomata} from '../models/pushdown-automata';
+import {DeterministicPushdownAutomata} from '../models/deterministic-pushdown-automata';
+import {NonDeterministicFiniteAutomata} from '../models/nondeterministic-pushdown-automata';
+import {DeterministicFiniteAutomata} from '../models/deterministic-finite-automata';
+import {DotSource} from '../models/dot-source';
 
 export type State<NonTerminal extends string, Terminal extends string> = Grammar<NonTerminal, Terminal>;
 
@@ -25,3 +30,47 @@ export function reducer<NonTerminal extends string,
             return state;
     }
 }
+
+export const selectPDA:
+    <NonTerminal extends string, Terminal extends string>(state: State<NonTerminal, Terminal>) =>
+        PushdownAutomata<'start' | 'rules' | 'done', Terminal, NonTerminal | Terminal>
+    = null as any; // TODO Section 7.2 Theorem 7.1
+
+export const PDAToDot:
+    <PDAState extends string, Input extends string, Stack extends string>
+    (pda: PushdownAutomata<PDAState, Input, Stack>) =>
+        DotSource
+    = null as any; // TODO
+
+export const selectDPDA:
+    <NonTerminal extends string, Terminal extends string>(state: State<NonTerminal, Terminal>) =>
+        DeterministicPushdownAutomata<any, Terminal, NonTerminal | Terminal>
+    = null as any; // TODO
+
+export const DPDAToDot:
+    <DPDAState extends string, Input extends string, Stack extends string>
+    (dpda: DeterministicPushdownAutomata<DPDAState, Input, Stack>) =>
+        DotSource
+    = null as any; // TODO
+
+export const selectNFA:
+    <NonTerminal extends string, Terminal extends string>(state: State<NonTerminal, Terminal>) =>
+        NonDeterministicFiniteAutomata<any, Terminal>
+    = null as any; // TODO
+
+export const NFAToDot:
+    <NFAState extends string, Input extends string>
+    (nfa: NonDeterministicFiniteAutomata<NFAState, Input>) =>
+        DotSource
+    = null as any; // TODO
+
+export const selectDFA:
+    <NonTerminal extends string, Terminal extends string>(state: State<NonTerminal, Terminal>) =>
+        DeterministicFiniteAutomata<any, Terminal>
+    = null as any; // TODO
+
+export const DFAToDot:
+    <DFAState extends string, Input extends string>
+    (dfa: NonDeterministicFiniteAutomata<DFAState, Input>) =>
+        DotSource
+    = null as any; // TODO

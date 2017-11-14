@@ -34,6 +34,53 @@ export function reducer<NonTerminal extends string,
     }
 }
 
+export const id: <T>(t: T) => T = x => x;
+
+export const selectGNF = id; // TODO
+
+const selectPDAFromGNF:
+    <NonTerminal extends string, Terminal extends string>(state: State<NonTerminal, Terminal>) =>
+        PushdownAutomata<'start' | 'rules' | 'done', Terminal, NonTerminal | Terminal | 'ZZ'>
+        = grammar => ({
+            initialStack: 'ZZ',
+            startState: 'start',
+            accepting: ['done'],
+            transition: [
+                {
+                    state: 'start',
+                    input: '',
+                    stack: 'ZZ',
+                    result: {
+                        state: 'rules',
+                        stack: [grammar[0].nonTerminal, 'ZZ'],
+                    },
+                },
+                ...grammar
+                    .map(({nonTerminal, production}) => ({
+                        nonTerminal,
+                        production: production.length === 2 ? production : [production[0], ''],
+                    }))
+                    .map(({nonTerminal, production: [a, u]}) => ({
+                        state: 'rules' as 'rules',
+                        input: u as '',
+                        stack: nonTerminal,
+                        result: {
+                            state: 'rules' as 'rules',
+                            stack: [a as 'ZZ']
+                        },
+                    })),
+                {
+                    state: 'rules',
+                    input: '',
+                    stack: 'ZZ',
+                    result: {
+                        state: 'done',
+                        stack: ['ZZ']
+                    },
+                }
+            ]
+        });
+
 export const selectPDA:
     <NonTerminal extends string, Terminal extends string>(state: State<NonTerminal, Terminal>) =>
         PushdownAutomata<'start' | 'rules' | 'done', Terminal, NonTerminal | Terminal>
@@ -66,8 +113,6 @@ export const selectNonTerminals:
     <NonTerminal extends string>(grammar: Grammar<NonTerminal, string>)
         => NonTerminal[]
     = grammar => grammar.map(rule => rule.nonTerminal);
-
-export const id: <T>(t: T) => T = x => x;
 
 export const isLeftLinear: (grammar: Grammar<string, string>) => boolean =
         createSelector(selectNonTerminals, id,

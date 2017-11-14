@@ -5,7 +5,7 @@ import {DeterministicPushdownAutomata} from '../models/deterministic-pushdown-au
 import {NonDeterministicFiniteAutomata} from '../models/nondeterministic-finite-automata';
 import {DeterministicFiniteAutomata} from '../models/deterministic-finite-automata';
 import {DotSource} from '../models/dot-source';
-import {createSelector} from '@ngrx/store';
+import {compose, createSelector} from '@ngrx/store';
 
 export type State<NonTerminal extends string, Terminal extends string> = Grammar<NonTerminal, Terminal>;
 
@@ -43,7 +43,8 @@ export const PDAToDot:
         DotSource
     = null as any; // TODO
 
-export const selectPDADot = createSelector(selectPDA, PDAToDot);
+// export const selectPDADot = createSelector(selectPDA, PDAToDot); // TODO
+export const selectPDADot = compose(selectPDA, PDAToDot); // TODO
 
 export const selectDPDA:
     <NonTerminal extends string, Terminal extends string>(state: State<NonTerminal, Terminal>) =>
@@ -56,7 +57,8 @@ export const DPDAToDot:
         DotSource
     = null as any; // TODO
 
-export const selectDPDADot = createSelector(selectDPDA, DPDAToDot);
+// export const selectDPDADot = createSelector(selectDPDA, DPDAToDot); // TODO
+export const selectDPDADot = compose(selectDPDA, DPDAToDot); // TODO
 
 export const selectNFA:
     <NonTerminal extends string, Terminal extends string>(state: State<NonTerminal, Terminal>) =>
@@ -69,7 +71,8 @@ export const NFAToDot:
         DotSource
     = null as any; // TODO
 
-export const selectNFADot = createSelector(selectNFA, NFAToDot);
+// export const selectNFADot = createSelector(selectNFA, NFAToDot); // TODO
+export const selectNFADot = compose(selectNFA, NFAToDot); // TODO
 
 export const selectDFA:
     <NonTerminal extends string, Terminal extends string>(state: State<NonTerminal, Terminal>) =>
@@ -82,4 +85,5 @@ export const DFAToDot:
         DotSource
     = null as any; // TODO
 
-export const selectDFADot = createSelector(selectDFA, DFAToDot);
+// export const selectDFADot = createSelector(selectDFA, DFAToDot); // TODO
+export const selectDFADot = compose(selectDFA, DFAToDot); // TODO

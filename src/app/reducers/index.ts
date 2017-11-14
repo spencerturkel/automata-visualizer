@@ -11,8 +11,3 @@ export const reducers: ActionReducerMap<State<any, any>> = {
 };
 
 export const selectGrammar = createFeatureSelector<fromGrammar.State<any, any>>('grammar');
-
-export type AppState = State<any, any>;
-
-export abstract class AppStore extends Store<AppState> {
-}

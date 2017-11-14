@@ -6,7 +6,7 @@ import {Store, StoreModule} from '@ngrx/store';
 import {AppComponent} from './app.component';
 import {AutomataViewComponent} from './components/automata-view/automata-view.component';
 import {GrammarFormViewComponent} from './components/grammar-form-view/grammar-form-view.component';
-import {AppStore, reducers} from './reducers/index';
+import {reducers} from './reducers/index';
 import {Environment} from './services/environment.service';
 import {Visualizer} from './services/visualizer.service';
 import {VizJsVisualizer} from './services/viz-js-visualizer';
@@ -24,7 +24,6 @@ import {VizJsVisualizer} from './services/viz-js-visualizer';
     ],
     providers: [
         Environment,
-        {provide: AppStore, useExisting: Store},
         {provide: Visualizer, useClass: VizJsVisualizer},
     ],
     bootstrap: [AppComponent],

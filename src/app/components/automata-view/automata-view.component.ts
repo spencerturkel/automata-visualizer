@@ -23,6 +23,7 @@ export class AutomataViewComponent {
     }
 
     get visualization(): SafeHtml {
+        console.log(this.dot);
         return this.visualizer.visualize(this.dot);
     }
 }

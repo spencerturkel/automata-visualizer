@@ -83,7 +83,27 @@ export const selectPDA: <NonTerminal extends string, Terminal extends string>(st
 export const PDAToDot: <PDAState extends string, Input extends string, Stack extends string>
 (pda: PushdownAutomata<PDAState, Input, Stack>) =>
     DotSource
-    = null as any; // TODO
+    = pda => {
+
+    const nodes =
+        pda.transition
+            .sort((left, right) => left.state === pda.startState ? -1 : 1)
+            .map(transition => ({
+                from: transition.state,
+                to: transition.result.state,
+                label: `${transition.input}, ${transition.stack} | ${transition.result.stack.join('')}`,
+            }));
+
+    return new DotSource(`
+    digraph {
+        node [shape = doublecircle]; ${pda.accepting.join(' ')}
+        node [shape = circle];
+        ${nodes.map(({from, to, label}) => `
+            ${from} -> ${to} [ label = "${label}" ];
+        `).join('\n')}
+    }
+    `);
+};
 
 // export const selectPDADot = createSelector(selectPDA, PDAToDot); // TODO
 export const selectPDADot = compose(selectPDA, PDAToDot); // TODO

@@ -2,7 +2,7 @@ import {Actions, NEW_GRAMMAR} from '../actions';
 import {Grammar} from '../models/grammar';
 import {PushdownAutomata} from '../models/pushdown-automata';
 import {DeterministicPushdownAutomata} from '../models/deterministic-pushdown-automata';
-import {NonDeterministicFiniteAutomata} from '../models/nondeterministic-pushdown-automata';
+import {NonDeterministicFiniteAutomata} from '../models/nondeterministic-finite-automata';
 import {DeterministicFiniteAutomata} from '../models/deterministic-finite-automata';
 import {DotSource} from '../models/dot-source';
 import {createSelector} from '@ngrx/store';

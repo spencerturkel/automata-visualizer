@@ -39,7 +39,7 @@ var NewGrammar = (function () {
 /***/ "../../../../../src/app/app.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<h1>Automata Visualizer</h1>\r\n<av-grammar-form-view *ngIf=\"grammar$ | async as grammar\" [grammar]=\"grammar\"\r\n                      (submit)=\"onSubmit($event)\"></av-grammar-form-view>\r\n<av-automata-view [dot]=\"pda$ | async\" title=\"Nondeterministic Pushdown Automaton\"></av-automata-view>\r\n<!--<av-automata-view [dot]=\"dpda$ | async\" title=\"Deterministic Pushdown Automaton\"></av-automata-view>-->\r\n<av-automata-view *ngIf=\"nfa$ | async as nfa; else noNFA\" [dot]=\"nfa\"\r\n                  title=\"Nondeterministic Finite Automaton\"></av-automata-view>\r\n<ng-template #noNFA>\r\n    <h2>Could not display an NFA, since the grammar is not linear.</h2>\r\n</ng-template>\r\n<!--<av-automata-view [dot]=\"dfa$ | async\" title=\"Deterministic Finite Automaton\"></av-automata-view>-->\r\n"
+module.exports = "<h1>Automata Visualizer</h1>\r\n<av-grammar-form-view *ngIf=\"grammar$ | async as grammar\" [grammar]=\"grammar\"\r\n                      (submit)=\"onSubmit($event)\"></av-grammar-form-view>\r\n<av-automata-view *ngIf=\"pda$ | async as pda; else noPDA\" [dot]=\"pda\"\r\n                  title=\"Nondeterministic Pushdown Automaton\"></av-automata-view>\r\n<ng-template #noPDA>\r\n    <h2>Could not display an NPDA - try putting the grammar in Greibach Normal Form.</h2>\r\n</ng-template>\r\n<av-automata-view *ngIf=\"nfa$ | async as nfa; else noNFA\" [dot]=\"nfa\"\r\n                  title=\"Nondeterministic Finite Automaton\"></av-automata-view>\r\n<ng-template #noNFA>\r\n    <h2>Could not display an NFA, since the grammar is not linear.</h2>\r\n</ng-template>\r\n"
 
 /***/ }),
 
@@ -391,13 +391,14 @@ var DotSource = (function () {
 /* unused harmony export initialState */
 /* harmony export (immutable) */ __webpack_exports__["a"] = reducer;
 /* unused harmony export id */
+/* unused harmony export selectNonTerminals */
+/* unused harmony export selectIdGreibach */
 /* unused harmony export selectGNF */
 /* unused harmony export selectPDA */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return selectPDADot; });
 /* unused harmony export selectDPDA */
 /* unused harmony export DPDAToDot */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return selectDPDADot; });
-/* unused harmony export selectNonTerminals */
 /* unused harmony export isLeftLinear */
 /* unused harmony export isRightLinear */
 /* unused harmony export selectLeftLinearNFA */
@@ -454,6 +455,16 @@ function reducer(state, action) {
     }
 }
 var id = function (x) { return x; };
+var selectNonTerminals = function (grammar) { return grammar
+    .map(function (rule) { return rule.nonTerminal; })
+    .reduce(function (result, next) { return result.includes(next) ? result : result.concat([next]); }, []); };
+var selectIdGreibach = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /* createSelector */])(selectNonTerminals, id, function (nonTerminals, grammar) {
+    return grammar.every(function (_a) {
+        var production = _a.production;
+        return !nonTerminals.includes(production[0]) &&
+            production.slice(1).every(function (val) { return nonTerminals.includes(val); });
+    });
+});
 var selectGNF = id; // TODO
 var selectPDAFromGNF = function (grammar) { return ({
     initialStack: 'ZZ',
@@ -518,14 +529,12 @@ var PDAToDot = function (pda) {
         return "\n            " + key + " [ label=\"" + labels.join('\\n') + "\" ];\n        ";
     }).join('\n') + "\n    }\n    ");
 };
-var selectPDADot = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /* createSelector */])(selectGNF, Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /* createSelector */])(selectPDAFromGNF, PDAToDot));
+var selectGNFPDADot = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /* createSelector */])(selectGNF, Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /* createSelector */])(selectPDAFromGNF, PDAToDot));
+var selectPDADot = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /* createSelector */])(selectIdGreibach, id, function (isGNF, grammar) { return isGNF ? selectGNFPDADot(grammar) : null; });
 var selectDPDA = null; // TODO
 var DPDAToDot = null; // TODO
 // export const selectDPDADot = createSelector(selectDPDA, DPDAToDot); // TODO
 var selectDPDADot = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["c" /* compose */])(selectDPDA, DPDAToDot); // TODO
-var selectNonTerminals = function (grammar) { return grammar
-    .map(function (rule) { return rule.nonTerminal; })
-    .reduce(function (result, next) { return result.includes(next) ? result : result.concat([next]); }, []); };
 var isLeftLinear = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /* createSelector */])(selectNonTerminals, id, function (nonTerminals, grammar) {
     return grammar.every(function (_a) {
         var production = _a.production;
@@ -578,7 +587,7 @@ var selectLeftLinearNFA = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /
                 })
                     .reduce(function (all, next) { return Object(__WEBPACK_IMPORTED_MODULE_1_deepmerge__["a" /* default */])(all, next); }, {});
             })
-                .reduce(function (all, next) { return Object(__WEBPACK_IMPORTED_MODULE_1_deepmerge__["a" /* default */])(all, next); }, {})
+                .reduce(function (all, next) { return Object(__WEBPACK_IMPORTED_MODULE_1_deepmerge__["a" /* default */])(all, next); }, {}),
         });
     })
         .reduce(function (all, _a) {

@@ -1,7 +1,6 @@
 import {Component} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {Observable} from 'rxjs/Observable';
-import {of} from 'rxjs/observable/of';
 
 import {NewGrammar} from './actions/index';
 import {DotSource} from './models/dot-source';
@@ -27,7 +26,7 @@ export class AppComponent {
 
     readonly pda$: Observable<DotSource>;
     // readonly dpda$: Observable<DotSource>;
-    readonly nfa$: Observable<DotSource>;
+    readonly nfa$: Observable<DotSource | null>;
     // readonly dfa$: Observable<DotSource>;
 
     constructor(

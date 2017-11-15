@@ -267,19 +267,32 @@ export const NFAToDot: <NFAState extends string, Input extends string>
     = <NFAState extends string, Input extends string>
 (nfa: NonDeterministicFiniteAutomata<NFAState, Input>) => {
     console.log('nfa', nfa);
-    const labelsAndTransitions = [].concat(...[].concat(Object.entries(nfa.transition)
-        .map(([input, stateTransition]) => ({
-            label: input,
-            stateTransitions: Object.entries(stateTransition),
-        }))
-        .map(({label, stateTransitions}) =>
-            stateTransitions.map(([from, tos]) =>
-                tos.map((to: string) =>
-                    ({
-                        from,
-                        label,
-                        to,
-                    })))) as any)) as {from: string, to: string, label: string}[];
+
+    const labelsAndTransitions = [] as {from: string, to: string, label: string}[];
+
+    for (const [label, stateTransition] of Object.entries(nfa.transition)) {
+        for (const [from, tos] of Object.entries(stateTransition)) {
+            for (const to of tos) {
+                labelsAndTransitions.push({from, to, label});
+            }
+        }
+    }
+
+    // const labelsAndTransitionsBuggy = Object.entries(nfa.transition)
+    //     .map(([input, stateTransition]) => ({
+    //         label: input,
+    //         stateTransitions: Object.entries(stateTransition),
+    //     }))
+    //     .map(({label, stateTransitions}) =>
+    //         stateTransitions.map(([from, tos]) =>
+    //             tos.map((to: string) =>
+    //                 ({
+    //                     from,
+    //                     label,
+    //                     to,
+    //                 }))) as any) as {from: string, to: string, label: string}[];
+    //
+    //                 console.log(labelsAndTransitions);
 
     return new DotSource(`
     digraph {
@@ -290,7 +303,7 @@ export const NFAToDot: <NFAState extends string, Input extends string>
         node [shape = circle];
         ${labelsAndTransitions.map(({from, label, to}) => `
         ${from} -> ${to} [ label="${label}" ];
-        `)}
+        `).join('\n')}
     }
     `);
 };

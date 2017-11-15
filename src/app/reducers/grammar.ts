@@ -12,17 +12,32 @@ import {PartialRecord} from '../models/partial-record';
 
 export type State<NonTerminal extends string, Terminal extends string> = Grammar<NonTerminal, Terminal>;
 
-export const initialState: State<'S', 'a' | 'b'> = [
+// export const initialState: State<'S', 'a' | 'b'> = [
+//     {
+//         nonTerminal: 'S',
+//         production: ['a', 'S'],
+//     },
+//     {
+//         nonTerminal: 'S',
+//         production: ['b', 'S'],
+//     },
+//     {
+//         nonTerminal: 'S',
+//         production: [],
+//     }
+// ];
+
+export const initialState: State<string, string> = [
     {
         nonTerminal: 'S',
-        production: ['a', 'S'],
+        production: ['a', 'A'],
     },
     {
-        nonTerminal: 'S',
-        production: ['b', 'S'],
+        nonTerminal: 'A',
+        production: ['a', 'b', 'S'],
     },
     {
-        nonTerminal: 'S',
+        nonTerminal: 'A',
         production: [],
     }
 ];
@@ -149,8 +164,6 @@ export const isLeftLinear: (grammar: Grammar<string, string>) => boolean =
     createSelector(selectNonTerminals, id,
         (nonTerminals, grammar) =>
             grammar.every(({production}) => {
-                console.log('nonTerminals', nonTerminals);
-                console.log('grammar', grammar);
                 const nonTerminalsInProduction = production.filter(value => nonTerminals.includes(value));
                 return nonTerminalsInProduction.length === 1
                     && production[0] === nonTerminalsInProduction[0] ||
@@ -209,26 +222,22 @@ export const selectRightLinearNFATransitions: <NonTerminal extends string, Termi
         grammar: Grammar<NonTerminal, Terminal>,
     ) => grammar.reduce(
         (transitions, {nonTerminal: variable, production: rule}) => {
-            const finalTransitionResult = !nonTerminals.includes(rule[rule.length - 1] as NonTerminal)
-                ? 'accept'
-                : rule[rule.length - 1];
-
-            const production = [...rule.slice(0, rule.length - 1), finalTransitionResult];
+            const production = nonTerminals.includes(rule[rule.length - 1] as NonTerminal) ? rule : [...rule, 'accept'];
 
             const productionStateNames = production
                 .slice(0, production.length - 1)
-                .map((_, index) => production.slice(0, index + 1).join(''))
+                .map((_, index) => production.slice(0, index).join(''))
                 .map(name => variable + name);
 
-            const productionTransitionResults = [...productionStateNames.slice(1), finalTransitionResult];
+            const productionTransitionResults = [...productionStateNames.slice(1), production[production.length - 1]];
 
-            const productionTransitions = productionStateNames.map((name, index) => {
-                const transitionResult = productionTransitionResults[index];
-                const transitionInput = transitionResult[transitionResult.length - 1];
+            const productionTransitions = productionStateNames.map((state, stateIndex) => {
+                const transitionResult = productionTransitionResults[stateIndex];
+                const transitionInput = production[stateIndex];
 
                 return {
                     [transitionInput]: {
-                        [name]: [transitionResult],
+                        [state]: [transitionResult],
                     },
                 };
             });

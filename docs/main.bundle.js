@@ -39,7 +39,7 @@ var NewGrammar = (function () {
 /***/ "../../../../../src/app/app.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<h1>Automata Visualizer</h1>\r\n<av-grammar-form-view *ngIf=\"grammar$ | async as grammar\" [grammar]=\"grammar\"\r\n                      (submit)=\"onSubmit($event)\"></av-grammar-form-view>\r\n<av-automata-view [dot]=\"pda$ | async\" title=\"Nondeterministic Pushdown Automaton\"></av-automata-view>\r\n<!--<av-automata-view [dot]=\"dpda$ | async\" title=\"Deterministic Pushdown Automaton\"></av-automata-view>-->\r\n<av-automata-view [dot]=\"nfa$ | async\" title=\"Nondeterministic Finite Automaton\"></av-automata-view>\r\n<!--<av-automata-view [dot]=\"dfa$ | async\" title=\"Deterministic Finite Automaton\"></av-automata-view>-->\r\n"
+module.exports = "<h1>Automata Visualizer</h1>\r\n<av-grammar-form-view *ngIf=\"grammar$ | async as grammar\" [grammar]=\"grammar\"\r\n                      (submit)=\"onSubmit($event)\"></av-grammar-form-view>\r\n<av-automata-view [dot]=\"pda$ | async\" title=\"Nondeterministic Pushdown Automaton\"></av-automata-view>\r\n<!--<av-automata-view [dot]=\"dpda$ | async\" title=\"Deterministic Pushdown Automaton\"></av-automata-view>-->\r\n<av-automata-view *ngIf=\"nfa$ | async as nfa; else noNFA\" [dot]=\"nfa\"\r\n                  title=\"Nondeterministic Finite Automaton\"></av-automata-view>\r\n<ng-template #noNFA>\r\n    <h2>Could not display an NFA, since the grammar is not linear.</h2>\r\n</ng-template>\r\n<!--<av-automata-view [dot]=\"dfa$ | async\" title=\"Deterministic Finite Automaton\"></av-automata-view>-->\r\n"
 
 /***/ }),
 
@@ -399,8 +399,9 @@ var DotSource = (function () {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return selectDPDADot; });
 /* unused harmony export selectNonTerminals */
 /* unused harmony export isLeftLinear */
-/* unused harmony export selectLeftLinearNFATransitions */
-/* unused harmony export selectRightLinearNFATransitions */
+/* unused harmony export isRightLinear */
+/* unused harmony export selectLeftLinearNFA */
+/* unused harmony export selectRightLinearNFA */
 /* unused harmony export selectNFA */
 /* unused harmony export NFAToDot */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return selectNFADot; });
@@ -534,61 +535,108 @@ var isLeftLinear = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /* creat
             nonTerminalsInProduction.length === 0;
     });
 });
-var selectLeftLinearNFATransitions = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /* createSelector */])(selectNonTerminals, id, function (nonTerminals, grammar) { return grammar.reduce(function (transitions, _a) {
-    var variable = _a.nonTerminal, rule = _a.production;
-    var finalTransitionResult = !nonTerminals.includes(rule[0]) ? 'accept' : rule[0];
-    var production = [finalTransitionResult].concat(rule.slice(rule.length - 1, 0));
-    var productionStateNames = production
-        .slice(production.length - 1, 0)
-        .map(function (_, index) { return production.slice(index - 1, 0).join(''); })
-        .map(function (name) { return variable + name; });
-    var productionTransitionResults = productionStateNames.slice(1).concat([finalTransitionResult]);
-    var productionTransitions = productionStateNames.map(function (name, index) {
-        var transitionResult = productionTransitionResults[index];
-        var transitionInput = transitionResult[transitionResult.length - 1];
-        return _a = {},
-            _a[transitionInput] = (_b = {},
-                _b[name] = [transitionResult],
-                _b),
-            _a;
-        var _a, _b;
+var isRightLinear = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /* createSelector */])(selectNonTerminals, id, function (nonTerminals, grammar) {
+    return grammar.every(function (_a) {
+        var production = _a.production;
+        var nonTerminalsInProduction = production.filter(function (value) { return nonTerminals.includes(value); });
+        return nonTerminalsInProduction.length === 1
+            && production[production.length - 1] === nonTerminalsInProduction[0] ||
+            nonTerminalsInProduction.length === 0;
     });
-    return Object(__WEBPACK_IMPORTED_MODULE_1_deepmerge__["a" /* default */])(transitions, productionTransitions.reduce(function (all, next) { return Object(__WEBPACK_IMPORTED_MODULE_1_deepmerge__["a" /* default */])(all, next); }, {}));
-}, {}); });
-var selectRightLinearNFATransitions = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /* createSelector */])(selectNonTerminals, id, function (nonTerminals, grammar) { return grammar.reduce(function (transitions, _a) {
-    var variable = _a.nonTerminal, rule = _a.production;
-    var production = nonTerminals.includes(rule[rule.length - 1]) ? rule : rule.concat(['accept']);
-    var productionStateNames = production
-        .slice(0, production.length - 1)
-        .map(function (_, index) { return production.slice(0, index).join(''); })
-        .map(function (name) { return variable + name; });
-    var productionTransitionResults = productionStateNames.slice(1).concat([production[production.length - 1]]);
-    var productionTransitions = productionStateNames.length > 0 ? productionStateNames.map(function (state, stateIndex) {
-        var transitionResult = productionTransitionResults[stateIndex];
-        var transitionInput = production[stateIndex];
-        return _a = {},
-            _a[transitionInput] = (_b = {},
-                _b[state] = [transitionResult],
-                _b),
-            _a;
-        var _a, _b;
-    }) : [
-        {
-            '': (_b = {},
-                _b[variable] = [productionTransitionResults[0]],
-                _b),
+});
+var selectLeftLinearNFA = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /* createSelector */])(selectNonTerminals, id, function (nonTerminals, grammar) {
+    var reversedGrammar = grammar.map(function (_a) {
+        var nonTerminal = _a.nonTerminal, production = _a.production;
+        return ({
+            nonTerminal: nonTerminal,
+            production: production.slice().reverse(),
+        });
+    });
+    var rightLinearNFA = selectNFA(reversedGrammar);
+    if (rightLinearNFA == null) {
+        throw new Error;
+    }
+    // TODO
+    var startState = 'Left-Linear Start';
+    var accepting = [rightLinearNFA.startState];
+    var transitionFromStart = {
+        '': {
+            'Left-Linear Start': rightLinearNFA.accepting,
         },
-    ];
-    return Object(__WEBPACK_IMPORTED_MODULE_1_deepmerge__["a" /* default */])(transitions, productionTransitions.reduce(function (all, next) { return Object(__WEBPACK_IMPORTED_MODULE_1_deepmerge__["a" /* default */])(all, next); }, {}));
-    var _b;
-}, {}); });
-var selectNFA = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /* createSelector */])(isLeftLinear, id, function (leftLinear, grammar) { return ({
+    };
+    var transition = Object.entries(rightLinearNFA.transition)
+        .map(function (_a) {
+        var input = _a[0], transitions = _a[1];
+        return ({
+            input: input,
+            transitions: Object.entries(transitions)
+                .map(function (_a) {
+                var from = _a[0], tos = _a[1];
+                return tos.map(function (to) {
+                    return (_a = {}, _a[to] = [from], _a);
+                    var _a;
+                })
+                    .reduce(function (all, next) { return Object(__WEBPACK_IMPORTED_MODULE_1_deepmerge__["a" /* default */])(all, next); }, {});
+            })
+                .reduce(function (all, next) { return Object(__WEBPACK_IMPORTED_MODULE_1_deepmerge__["a" /* default */])(all, next); }, {})
+        });
+    })
+        .reduce(function (all, _a) {
+        var input = _a.input, transitions = _a.transitions;
+        return Object(__WEBPACK_IMPORTED_MODULE_1_deepmerge__["a" /* default */])(all, (_b = {},
+            _b[input] = transitions,
+            _b));
+        var _b;
+    }, transitionFromStart);
+    return {
+        startState: startState,
+        accepting: accepting,
+        transition: transition,
+    };
+});
+var selectRightLinearNFA = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /* createSelector */])(selectNonTerminals, id, function (nonTerminals, grammar) { return ({
     startState: grammar[0].nonTerminal,
     accepting: ['accept'],
-    transition: (leftLinear
-        ? selectLeftLinearNFATransitions(grammar)
-        : selectRightLinearNFATransitions(grammar)),
+    transition: grammar
+        .reduce(function (transitions, _a) {
+        var variable = _a.nonTerminal, rule = _a.production;
+        var production = nonTerminals.includes(rule[rule.length - 1])
+            ? rule
+            : rule.concat([
+                'accept',
+            ]);
+        var productionStateNames = production
+            .slice(0, production.length - 1)
+            .map(function (_, index) { return production.slice(0, index).join(''); })
+            .map(function (name) { return variable + name; });
+        var productionTransitionResults = productionStateNames.slice(1).concat([
+            production[production.length - 1],
+        ]);
+        var productionTransitions = productionStateNames.length > 0 ? productionStateNames.map(function (state, stateIndex) {
+            var transitionResult = productionTransitionResults[stateIndex];
+            var transitionInput = production[stateIndex];
+            return _a = {},
+                _a[transitionInput] = (_b = {},
+                    _b[state] = [transitionResult],
+                    _b),
+                _a;
+            var _a, _b;
+        }) : [
+            {
+                '': (_b = {},
+                    _b[variable] = [productionTransitionResults[0]],
+                    _b),
+            },
+        ];
+        return Object(__WEBPACK_IMPORTED_MODULE_1_deepmerge__["a" /* default */])(transitions, productionTransitions.reduce(function (all, next) { return Object(__WEBPACK_IMPORTED_MODULE_1_deepmerge__["a" /* default */])(all, next); }, {}));
+        var _b;
+    }, {}),
 }); });
+var selectNFA = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /* createSelector */])(isLeftLinear, id, function (leftLinear, grammar) { return leftLinear
+    ? selectLeftLinearNFA(grammar)
+    : isRightLinear(grammar)
+        ? selectRightLinearNFA(grammar)
+        : null; });
 var NFAToDot = function (nfa) {
     console.log('nfa', nfa);
     var labelsAndTransitions = [];
@@ -604,11 +652,10 @@ var NFAToDot = function (nfa) {
     }
     return new __WEBPACK_IMPORTED_MODULE_3__models_dot_source__["a" /* DotSource */]("\n    digraph {\n        rankdir=LR;\n        splines=true;\n        overlap = false;\n        node [shape = doublecircle]; " + nfa.accepting.join(' ') + "\n        node [shape = circle];\n        " + labelsAndTransitions.map(function (_a) {
         var from = _a.from, label = _a.label, to = _a.to;
-        return "\n        " + from + " -> " + to + " [ label=\"" + label + "\" ];\n        ";
+        return "\n        \"" + from + "\" -> \"" + to + "\" [ label=\"" + label + "\" ];\n        ";
     }).join('\n') + "\n    }\n    ");
 };
-// export const selectNFADot = createSelector(selectNFA, NFAToDot); // TODO
-var selectNFADot = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /* createSelector */])(selectNFA, NFAToDot); // TODO
+var selectNFADot = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /* createSelector */])(selectNFA, function (nfa) { return nfa ? NFAToDot(nfa) : null; });
 var selectDFA = null; // TODO
 var DFAToDot = null; // TODO
 // export const selectDFADot = createSelector(selectDFA, DFAToDot); // TODO

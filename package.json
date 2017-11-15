@@ -6,7 +6,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "deploy": "ng build --output-path docs --base-href automata-visualizer; git commit -am 'Deploy'; git push",
+    "deploy": "ng build --output-path docs --base-href automata-visualizer",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"

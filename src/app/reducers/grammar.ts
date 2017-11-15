@@ -39,7 +39,7 @@ export const initialState: State<string, string> = [
     {
         nonTerminal: 'A',
         production: [],
-    }
+    },
 ];
 
 export function reducer<NonTerminal extends string,
@@ -156,9 +156,9 @@ export const selectDPDADot = compose(selectDPDA, DPDAToDot); // TODO
 
 export const selectNonTerminals: <NonTerminal extends string>(grammar: Grammar<NonTerminal, string>)
     => NonTerminal[]
-    = <NonTerminal extends string> (grammar: Grammar<NonTerminal, string>) => grammar
-        .map(rule => rule.nonTerminal)
-        .reduce((result, next) => result.includes(next) ? result : [...result, next], [] as NonTerminal[]);
+    = <NonTerminal extends string>(grammar: Grammar<NonTerminal, string>) => grammar
+    .map(rule => rule.nonTerminal)
+    .reduce((result, next) => result.includes(next) ? result : [...result, next], [] as NonTerminal[]);
 
 export const isLeftLinear: (grammar: Grammar<string, string>) => boolean =
     createSelector(selectNonTerminals, id,
@@ -231,7 +231,10 @@ export const selectRightLinearNFATransitions: <NonTerminal extends string, Termi
 
             const productionTransitionResults = [...productionStateNames.slice(1), production[production.length - 1]];
 
-            const productionTransitions = productionStateNames.map((state, stateIndex) => {
+            const productionTransitions = productionStateNames.length > 0 ? productionStateNames.map((
+                state,
+                stateIndex,
+            ) => {
                 const transitionResult = productionTransitionResults[stateIndex];
                 const transitionInput = production[stateIndex];
 
@@ -240,7 +243,13 @@ export const selectRightLinearNFATransitions: <NonTerminal extends string, Termi
                         [state]: [transitionResult],
                     },
                 };
-            });
+            }) : [
+                {
+                    '': {
+                        [variable as string]: [productionTransitionResults[0]],
+                    },
+                },
+            ];
 
             return deepmerge(transitions, productionTransitions.reduce(
                 (all, next) => deepmerge(all, next),
@@ -268,31 +277,15 @@ export const NFAToDot: <NFAState extends string, Input extends string>
 (nfa: NonDeterministicFiniteAutomata<NFAState, Input>) => {
     console.log('nfa', nfa);
 
-    const labelsAndTransitions = [] as {from: string, to: string, label: string}[];
+    const labelsAndTransitions = [] as { from: string, to: string, label: string }[];
 
     for (const [label, stateTransition] of Object.entries(nfa.transition)) {
         for (const [from, tos] of Object.entries(stateTransition)) {
             for (const to of tos) {
-                labelsAndTransitions.push({from, to, label});
+                labelsAndTransitions.push({from, to, label: label || '&lambda;'});
             }
         }
     }
-
-    // const labelsAndTransitionsBuggy = Object.entries(nfa.transition)
-    //     .map(([input, stateTransition]) => ({
-    //         label: input,
-    //         stateTransitions: Object.entries(stateTransition),
-    //     }))
-    //     .map(({label, stateTransitions}) =>
-    //         stateTransitions.map(([from, tos]) =>
-    //             tos.map((to: string) =>
-    //                 ({
-    //                     from,
-    //                     label,
-    //                     to,
-    //                 }))) as any) as {from: string, to: string, label: string}[];
-    //
-    //                 console.log(labelsAndTransitions);
 
     return new DotSource(`
     digraph {

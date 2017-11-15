@@ -141,8 +141,8 @@ export const isLeftLinear: (grammar: Grammar<string, string>) => boolean =
             grammar.every(({production}) => {
                 const nonTerminalsInProduction = production.filter(value => nonTerminals.includes(value));
                 return nonTerminalsInProduction.length === 1
-                    && production[production.length - 1] === nonTerminalsInProduction[0] ||
-                    nonTerminalsInProduction.length === 0 && production.length === 1;
+                    && production[0] === nonTerminalsInProduction[0] ||
+                    nonTerminalsInProduction.length === 0;
             }),
     );
 
@@ -245,6 +245,7 @@ export const NFAToDot: <NFAState extends string, Input extends string>
     DotSource
     = <NFAState extends string, Input extends string>
 (nfa: NonDeterministicFiniteAutomata<NFAState, Input>) => {
+    console.log('nfa', nfa);
     const labelsAndTransitions = [].concat(...[].concat(Object.entries(nfa.transition)
         .map(([input, stateTransition]) => ({
             label: input,
@@ -274,7 +275,7 @@ export const NFAToDot: <NFAState extends string, Input extends string>
 };
 
 // export const selectNFADot = createSelector(selectNFA, NFAToDot); // TODO
-export const selectNFADot = compose(selectNFA, NFAToDot); // TODO
+export const selectNFADot = createSelector(selectNFA, NFAToDot); // TODO
 
 export const selectDFA: <NonTerminal extends string, Terminal extends string>(state: State<NonTerminal, Terminal>) =>
     DeterministicFiniteAutomata<any, Terminal>

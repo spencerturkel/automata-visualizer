@@ -27,7 +27,7 @@ export class AppComponent {
 
     readonly pda$: Observable<DotSource>;
     // readonly dpda$: Observable<DotSource>;
-    // readonly nfa$: Observable<DotSource>;
+    readonly nfa$: Observable<DotSource>;
     // readonly dfa$: Observable<DotSource>;
 
     constructor(
@@ -39,7 +39,7 @@ export class AppComponent {
         this.grammar$ = this.store.select(selectGrammar);
         this.pda$ = this.store.select(selectGrammarPDADot);
         // this.dpda$ = this.store.select(selectGrammarDPDADot);
-        // this.nfa$ = this.store.select(selectGrammarNFADot);
+        this.nfa$ = this.store.select(selectGrammarNFADot);
         // this.dfa$ = this.store.select(selectGrammarDFADot);
     }
 

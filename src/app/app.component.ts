@@ -24,7 +24,7 @@ export class AppComponent {
 
     readonly grammar$: Observable<Grammar<any, any>>;
 
-    readonly pda$: Observable<DotSource>;
+    readonly pda$: Observable<DotSource | null>;
     // readonly dpda$: Observable<DotSource>;
     readonly nfa$: Observable<DotSource | null>;
     // readonly dfa$: Observable<DotSource>;

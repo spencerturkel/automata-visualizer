@@ -60,6 +60,24 @@ export function reducer<NonTerminal extends string,
 
 export const id: <T>(t: T) => T = x => x;
 
+export const selectNonTerminals: <NonTerminal extends string>(grammar: Grammar<NonTerminal, string>)
+    => NonTerminal[]
+    = <NonTerminal extends string>(grammar: Grammar<NonTerminal, string>) => grammar
+    .map(rule => rule.nonTerminal)
+    .reduce((result, next) => result.includes(next) ? result : [...result, next], [] as NonTerminal[]);
+
+export const selectIdGreibach = createSelector(
+    selectNonTerminals,
+    id,
+    <NonTerminal extends string, Terminal extends string>(
+        nonTerminals: NonTerminal[],
+        grammar: Grammar<NonTerminal, Terminal>,
+    ): boolean => {
+        return grammar.every(({production}) => !nonTerminals.includes(production[0] as NonTerminal) &&
+            production.slice(1).every(val => nonTerminals.includes(val as NonTerminal)));
+    },
+);
+
 export const selectGNF = id; // TODO
 
 const selectPDAFromGNF: <NonTerminal extends string, Terminal extends string>(state: State<NonTerminal, Terminal>) =>
@@ -140,7 +158,12 @@ const PDAToDot: <PDAState extends string, Input extends string, Stack extends st
     `);
 };
 
-export const selectPDADot = createSelector(selectGNF, createSelector(selectPDAFromGNF, PDAToDot));
+const selectGNFPDADot = createSelector(selectGNF, createSelector(selectPDAFromGNF, PDAToDot));
+export const selectPDADot = createSelector(
+    selectIdGreibach,
+    id,
+    (isGNF, grammar) => isGNF ? selectGNFPDADot(grammar) : null,
+);
 
 export const selectDPDA: <NonTerminal extends string, Terminal extends string>(state: State<NonTerminal, Terminal>) =>
     DeterministicPushdownAutomata<any, Terminal, NonTerminal | Terminal>
@@ -153,12 +176,6 @@ export const DPDAToDot: <DPDAState extends string, Input extends string, Stack e
 
 // export const selectDPDADot = createSelector(selectDPDA, DPDAToDot); // TODO
 export const selectDPDADot = compose(selectDPDA, DPDAToDot); // TODO
-
-export const selectNonTerminals: <NonTerminal extends string>(grammar: Grammar<NonTerminal, string>)
-    => NonTerminal[]
-    = <NonTerminal extends string>(grammar: Grammar<NonTerminal, string>) => grammar
-    .map(rule => rule.nonTerminal)
-    .reduce((result, next) => result.includes(next) ? result : [...result, next], [] as NonTerminal[]);
 
 export const isLeftLinear: (grammar: Grammar<string, string>) => boolean =
     createSelector(selectNonTerminals, id,
@@ -218,7 +235,7 @@ export const selectLeftLinearNFA: <NonTerminal extends string, Terminal extends 
                     .map(([from, tos]) =>
                         tos.map((to: string) => ({[to]: [from]}))
                             .reduce((all: any, next: any) => deepmerge(all, next), {}))
-                    .reduce((all: any, next: any) => deepmerge(all, next), {})
+                    .reduce((all: any, next: any) => deepmerge(all, next), {}),
             }))
             .reduce((all, {input, transitions}) => deepmerge(all, {
                 [input]: transitions,

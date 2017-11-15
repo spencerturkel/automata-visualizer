@@ -1,11 +1,13 @@
 <h1>Automata Visualizer</h1>
 <av-grammar-form-view *ngIf="grammar$ | async as grammar" [grammar]="grammar"
                       (submit)="onSubmit($event)"></av-grammar-form-view>
-<av-automata-view [dot]="pda$ | async" title="Nondeterministic Pushdown Automaton"></av-automata-view>
-<!--<av-automata-view [dot]="dpda$ | async" title="Deterministic Pushdown Automaton"></av-automata-view>-->
+<av-automata-view *ngIf="pda$ | async as pda; else noPDA" [dot]="pda"
+                  title="Nondeterministic Pushdown Automaton"></av-automata-view>
+<ng-template #noPDA>
+    <h2>Could not display an NPDA - try putting the grammar in Greibach Normal Form.</h2>
+</ng-template>
 <av-automata-view *ngIf="nfa$ | async as nfa; else noNFA" [dot]="nfa"
                   title="Nondeterministic Finite Automaton"></av-automata-view>
 <ng-template #noNFA>
     <h2>Could not display an NFA, since the grammar is not linear.</h2>
 </ng-template>
-<!--<av-automata-view [dot]="dfa$ | async" title="Deterministic Finite Automaton"></av-automata-view>-->

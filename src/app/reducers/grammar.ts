@@ -12,11 +12,19 @@ import {PartialRecord} from '../models/partial-record';
 
 export type State<NonTerminal extends string, Terminal extends string> = Grammar<NonTerminal, Terminal>;
 
-export const initialState: State<'S', ''> = [
+export const initialState: State<'S', 'a' | 'b'> = [
     {
         nonTerminal: 'S',
-        production: [''],
+        production: ['a', 'S'],
     },
+    {
+        nonTerminal: 'S',
+        production: ['b', 'S'],
+    },
+    {
+        nonTerminal: 'S',
+        production: [],
+    }
 ];
 
 export function reducer<NonTerminal extends string,
@@ -133,12 +141,16 @@ export const selectDPDADot = compose(selectDPDA, DPDAToDot); // TODO
 
 export const selectNonTerminals: <NonTerminal extends string>(grammar: Grammar<NonTerminal, string>)
     => NonTerminal[]
-    = grammar => grammar.map(rule => rule.nonTerminal);
+    = <NonTerminal extends string> (grammar: Grammar<NonTerminal, string>) => grammar
+        .map(rule => rule.nonTerminal)
+        .reduce((result, next) => result.includes(next) ? result : [...result, next], [] as NonTerminal[]);
 
 export const isLeftLinear: (grammar: Grammar<string, string>) => boolean =
     createSelector(selectNonTerminals, id,
         (nonTerminals, grammar) =>
             grammar.every(({production}) => {
+                console.log('nonTerminals', nonTerminals);
+                console.log('grammar', grammar);
                 const nonTerminalsInProduction = production.filter(value => nonTerminals.includes(value));
                 return nonTerminalsInProduction.length === 1
                     && production[0] === nonTerminalsInProduction[0] ||

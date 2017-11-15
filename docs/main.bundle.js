@@ -441,7 +441,7 @@ var initialState = [
     {
         nonTerminal: 'A',
         production: [],
-    }
+    },
 ];
 function reducer(state, action) {
     if (state === void 0) { state = initialState; }
@@ -563,7 +563,7 @@ var selectRightLinearNFATransitions = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_s
         .map(function (_, index) { return production.slice(0, index).join(''); })
         .map(function (name) { return variable + name; });
     var productionTransitionResults = productionStateNames.slice(1).concat([production[production.length - 1]]);
-    var productionTransitions = productionStateNames.map(function (state, stateIndex) {
+    var productionTransitions = productionStateNames.length > 0 ? productionStateNames.map(function (state, stateIndex) {
         var transitionResult = productionTransitionResults[stateIndex];
         var transitionInput = production[stateIndex];
         return _a = {},
@@ -572,8 +572,15 @@ var selectRightLinearNFATransitions = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_s
                 _b),
             _a;
         var _a, _b;
-    });
+    }) : [
+        {
+            '': (_b = {},
+                _b[variable] = [productionTransitionResults[0]],
+                _b),
+        },
+    ];
     return Object(__WEBPACK_IMPORTED_MODULE_1_deepmerge__["a" /* default */])(transitions, productionTransitions.reduce(function (all, next) { return Object(__WEBPACK_IMPORTED_MODULE_1_deepmerge__["a" /* default */])(all, next); }, {}));
+    var _b;
 }, {}); });
 var selectNFA = Object(__WEBPACK_IMPORTED_MODULE_0__ngrx_store__["e" /* createSelector */])(isLeftLinear, id, function (leftLinear, grammar) { return ({
     startState: grammar[0].nonTerminal,
@@ -591,25 +598,10 @@ var NFAToDot = function (nfa) {
             var _e = _d[_c], from = _e[0], tos = _e[1];
             for (var _f = 0, tos_1 = tos; _f < tos_1.length; _f++) {
                 var to = tos_1[_f];
-                labelsAndTransitions.push({ from: from, to: to, label: label });
+                labelsAndTransitions.push({ from: from, to: to, label: label || '&lambda;' });
             }
         }
     }
-    // const labelsAndTransitionsBuggy = Object.entries(nfa.transition)
-    //     .map(([input, stateTransition]) => ({
-    //         label: input,
-    //         stateTransitions: Object.entries(stateTransition),
-    //     }))
-    //     .map(({label, stateTransitions}) =>
-    //         stateTransitions.map(([from, tos]) =>
-    //             tos.map((to: string) =>
-    //                 ({
-    //                     from,
-    //                     label,
-    //                     to,
-    //                 }))) as any) as {from: string, to: string, label: string}[];
-    //
-    //                 console.log(labelsAndTransitions);
     return new __WEBPACK_IMPORTED_MODULE_3__models_dot_source__["a" /* DotSource */]("\n    digraph {\n        rankdir=LR;\n        splines=true;\n        overlap = false;\n        node [shape = doublecircle]; " + nfa.accepting.join(' ') + "\n        node [shape = circle];\n        " + labelsAndTransitions.map(function (_a) {
         var from = _a.from, label = _a.label, to = _a.to;
         return "\n        " + from + " -> " + to + " [ label=\"" + label + "\" ];\n        ";

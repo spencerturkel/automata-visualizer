@@ -11,7 +11,12 @@ export class VizJsVisualizer implements Visualizer {
     }
 
     visualize(source: DotSource): SafeHtml {
-        const viz = Viz(source.payload);
-        return this.sanitizer.bypassSecurityTrustHtml(viz);
+        try {
+            const viz = Viz(source.payload);
+            return this.sanitizer.bypassSecurityTrustHtml(viz);
+        } catch (e) {
+            console.error(source.payload);
+            throw e;
+        }
     }
 }
